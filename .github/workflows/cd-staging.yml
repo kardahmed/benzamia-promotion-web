@@ -32,7 +32,7 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
