@@ -1,0 +1,24 @@
+{
+  "name": "BENZAMIA Promotion — Cloud Development",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-24-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "BENZAMIA web",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "github.vscode-github-actions"
+      ]
+    }
+  }
+}
