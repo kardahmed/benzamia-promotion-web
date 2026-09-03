@@ -1,35 +1,47 @@
 # Stack technique — décision finale
 
-L'infrastructure BENZAMIA utilise trois plateformes uniquement : **GitHub, Supabase et Hostinger**.
+La plateforme BENZAMIA repose sur trois services seulement : **GitHub, Supabase et Hostinger Cloud**.
+
+## Invariant d'architecture
+
+- 1 dépôt GitHub : `kardahmed/benzamia-promotion-web`
+- 1 projet Supabase : `benzamia-promotion`
+- 1 base PostgreSQL Supabase
+- 1 application de production Hostinger Cloud reliée à la branche `main`
+
+Aucun second dépôt et aucune seconde base permanente ne doivent être créés.
 
 | Plateforme | Responsabilités |
 |---|---|
-| GitHub | Dépôt, branches, pull requests, CI/CD, Codespaces, Dependabot et images Docker GHCR |
-| Supabase | PostgreSQL, Auth, Storage, API, Queues, Cron, Edge Functions et politiques RLS |
-| Hostinger | VPS Docker, application Next.js, Caddy/TLS, domaine, DNS et email professionnel |
+| GitHub | Dépôt unique, branches, pull requests, CI, Codespaces et Dependabot |
+| Supabase | Projet unique, PostgreSQL, Auth, Storage, API, Queues, Cron, Edge Functions et RLS |
+| Hostinger Cloud | Node.js managé, déploiement GitHub automatique, domaine, DNS, SSL, CDN et email professionnel |
 
 ## Technologies applicatives
 
 | Domaine | Technologie |
 |---|---|
 | Web | Next.js 16.3.4, React 19.2.8, TypeScript |
-| Données | Supabase PostgreSQL |
+| Données | Une base Supabase PostgreSQL |
 | Back-office | Interface Next.js protégée par Supabase Auth |
-| Médias | Supabase Storage |
-| Tâches fiables | Supabase Queues, basé sur pgmq |
-| Planification | Supabase Cron, basé sur pg_cron |
+| Médias | Supabase Storage dans le même projet |
+| Tâches fiables | Supabase Queues |
+| Planification | Supabase Cron |
 | Fonctions asynchrones | Supabase Edge Functions |
 | Email | SMTP Hostinger |
-| Exécution | Docker sur Hostinger VPS |
-| Reverse proxy | Caddy sur Hostinger |
-| Livraison | GitHub Actions → GHCR → Hostinger |
+| Exécution | Application Node.js managée par Hostinger Cloud |
+| Livraison | GitHub Actions pour la CI, intégration GitHub Hostinger pour le CD |
 
 ## Intégrations externes
 
-Google Analytics, Google Ads, Meta Pixel/CAPI et IMMO PRO-X restent nécessaires au produit, mais ne stockent pas le code, les médias ou la base principale.
+Google Analytics, Google Ads, Meta Pixel/CAPI et IMMO PRO-X restent nécessaires au produit, mais ne stockent ni le code, ni les médias, ni la base principale.
 
-## Ce qui est explicitement exclu
+## Explicitement exclus
 
+- VPS
+- Docker et Docker Compose
+- Caddy
+- GHCR
 - Payload CMS
 - Redis et BullMQ
 - Cloudflare et R2
@@ -40,7 +52,7 @@ Google Analytics, Google Ads, Meta Pixel/CAPI et IMMO PRO-X restent nécessaires
 
 ## Politique de versions
 
-- Node.js 24 LTS.
+- Node.js 24, conformément à `package.json`.
 - Dépendances runtime épinglées.
 - Dependabot propose les mises à jour.
-- Toute mise à jour passe par CI et recette staging.
+- Toute mise à jour passe par une pull request et la CI avant le déploiement Hostinger.

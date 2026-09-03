@@ -2,23 +2,26 @@
 
 ## Phase 0 — Fondation
 
-- [x] Dépôt GitHub et source de vérité distante
-- [x] Next.js, TypeScript, Docker et Codespaces
-- [x] CI, GHCR et workflows Hostinger
+- [x] Dépôt GitHub unique et source de vérité distante
+- [x] Next.js, TypeScript et Codespaces
+- [x] CI GitHub Actions
 - [x] Contenu validé de la homepage
 - [x] Stack limitée à GitHub + Supabase + Hostinger
-- [ ] Créer les projets Supabase staging et production
-- [ ] Créer les GitHub Environments et secrets
-- [ ] Générer le package-lock depuis GitHub Actions
+- [x] Architecture corrigée : sans VPS, Docker, Caddy ou GHCR
+- [ ] Créer un seul projet Supabase : `benzamia-promotion`
+- [ ] Créer le GitHub Environment `production` et ses secrets Supabase
+- [ ] Connecter le dépôt et la branche `main` à Hostinger Cloud dans hPanel
+- [ ] Configurer les variables runtime Hostinger
+- [ ] Générer le `package-lock.json` depuis GitHub Actions
 
-## Phase 1 — Supabase
+## Phase 1 — Supabase unique
 
 - [ ] Schéma projets, typologies, lots, médias, visites et agents
 - [ ] RLS et rôles du back-office
 - [ ] Buckets images, plans, brochures et visites 360°
 - [ ] Queues IMMO PRO-X, email et conversions
 - [ ] Cron et Edge Functions
-- [ ] Migrations staging puis production via GitHub Actions
+- [ ] Migrations vers la base unique, après revue et approbation
 
 ## Phase 2 — Expérience
 
@@ -35,7 +38,7 @@
 - [ ] Adaptateur IMMO PRO-X
 - [ ] Rotation transactionnelle des conseillers
 - [ ] Email SMTP Hostinger
-- [ ] Déduplication, retries et alertes
+- [ ] Déduplication, reprises et alertes
 
 ## Phase 4 — Acquisition et qualité
 
@@ -43,4 +46,4 @@
 - [ ] GA4, Google Ads et Meta Pixel/CAPI
 - [ ] SEO technique, données structurées et redirections
 - [ ] Tests Playwright, accessibilité et Lighthouse
-- [ ] Monitoring Hostinger/Supabase et exercice de rollback
+- [ ] Monitoring Hostinger/Supabase et exercice de retour arrière

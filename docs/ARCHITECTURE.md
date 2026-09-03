@@ -1,16 +1,19 @@
-# Architecture GitHub + Supabase + Hostinger
+# Architecture GitHub + Supabase + Hostinger Cloud
 
 ## Flux de livraison
 
-1. Une branche et une pull request sont créées dans GitHub.
+1. Une branche et une pull request sont créées dans l'unique dépôt GitHub.
 2. GitHub Actions exécute lint, typage, tests et build.
-3. Les migrations validées sont appliquées au projet Supabase de staging.
-4. Après fusion, GitHub Actions construit une image Docker immuable dans GHCR.
-5. Hostinger VPS déploie cette image sur le domaine de staging.
-6. La production utilise exactement le tag testé, après approbation GitHub Environment.
-7. Le rollback redéploie le tag GHCR précédent.
+3. La pull request ne peut être fusionnée sur `main` qu'après validation de la CI.
+4. Hostinger Cloud suit la branche `main` via l'intégration GitHub de hPanel.
+5. Après chaque fusion, Hostinger installe les dépendances, construit puis redémarre l'application Next.js managée.
+6. Un retour arrière passe par un revert du commit défaillant, puis par le même déploiement automatique.
 
-## Supabase
+Il n'y a ni image Docker, ni serveur VPS, ni reverse proxy à administrer.
+
+## Une seule source de données
+
+Le projet Supabase `benzamia-promotion` est l'unique source de vérité persistante :
 
 - **PostgreSQL** : projets, typologies, lots, statuts, demandes, agents et journal d'intégration.
 - **Auth** : accès au back-office et rôles administrateur, marketing et commercial.
@@ -20,9 +23,11 @@
 - **Edge Functions** : webhooks et traitements asynchrones.
 - **RLS** : lecture publique limitée aux contenus publiés ; données personnelles interdites au rôle anonyme.
 
-## Hostinger
+Aucun projet Supabase de staging n'est créé. Les changements de schéma sont versionnés dans le dépôt, contrôlés en pull request puis appliqués une seule fois à la base unique après approbation.
 
-Hostinger exécute l'application Next.js en Docker avec Caddy. L'application sert le site public, le back-office et les routes serveur. L'email transactionnel utilise le SMTP Hostinger. Aucun service de données durable ne réside dans le conteneur web.
+## Hostinger Cloud
+
+Hostinger exécute l'application Next.js comme application Node.js managée. hPanel prend en charge la construction, le redémarrage, le domaine et le SSL. Les variables runtime sont configurées dans hPanel. L'email transactionnel utilise le SMTP Hostinger.
 
 ## IMMO PRO-X
 
@@ -30,7 +35,7 @@ Chaque réservation est d'abord enregistrée dans Supabase avec un identifiant d
 
 ## Rotation commerciale
 
-La transaction d'attribution s'exécute dans PostgreSQL afin d'éviter les doubles attributions. Elle considère les agents actifs, projets autorisés, horaires, charge, dernière attribution et indisponibilités.
+La transaction d'attribution s'exécute dans PostgreSQL afin d'éviter les doubles attributions. Elle considère les agents actifs, les projets autorisés, les horaires, la charge, la dernière attribution et les indisponibilités.
 
 ## Google et Meta
 
