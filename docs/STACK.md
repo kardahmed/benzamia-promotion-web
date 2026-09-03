@@ -1,33 +1,46 @@
-# Stack technique de référence
+# Stack technique — décision finale
 
-| Domaine | Technologie | Rôle |
-|---|---|---|
-| Application web | Next.js 16, React 19, TypeScript | Site public, rendu serveur, routes API et SEO |
-| CMS | Payload CMS 3 | Projets, logements, médias, visites virtuelles, guides et actualités |
-| Base de données | PostgreSQL | Contenus structurés, disponibilités, demandes et journal d'intégration |
-| File de tâches | Redis + BullMQ | Retries IMMO PRO-X, emails et conversions publicitaires |
-| Validation | Schémas TypeScript/Zod | Contrats de formulaires, webhooks et API |
-| Médias | Stockage S3 compatible / Cloudflare R2 | Images, plans, brochures et panoramas |
-| Edge | Cloudflare | DNS, CDN, WAF, cache et protection |
-| Exécution | Docker sur Hostinger VPS | Staging et production |
-| Registre | GitHub Container Registry | Images Docker immuables par SHA |
-| CI/CD | GitHub Actions + Environments | Qualité, build, approbation, déploiement et rollback |
-| Email | Postmark ou Resend, choix à valider | Emails transactionnels et délivrabilité |
-| Observabilité | Sentry + supervision HTTP | Erreurs, performance et disponibilité |
-| Mesure | GTM, GA4, Google Ads, Meta Pixel + CAPI | Mesure consentie et rapprochement des conversions |
+L'infrastructure BENZAMIA utilise trois plateformes uniquement : **GitHub, Supabase et Hostinger**.
+
+| Plateforme | Responsabilités |
+|---|---|
+| GitHub | Dépôt, branches, pull requests, CI/CD, Codespaces, Dependabot et images Docker GHCR |
+| Supabase | PostgreSQL, Auth, Storage, API, Queues, Cron, Edge Functions et politiques RLS |
+| Hostinger | VPS Docker, application Next.js, Caddy/TLS, domaine, DNS et email professionnel |
+
+## Technologies applicatives
+
+| Domaine | Technologie |
+|---|---|
+| Web | Next.js 16.3.4, React 19.2.8, TypeScript |
+| Données | Supabase PostgreSQL |
+| Back-office | Interface Next.js protégée par Supabase Auth |
+| Médias | Supabase Storage |
+| Tâches fiables | Supabase Queues, basé sur pgmq |
+| Planification | Supabase Cron, basé sur pg_cron |
+| Fonctions asynchrones | Supabase Edge Functions |
+| Email | SMTP Hostinger |
+| Exécution | Docker sur Hostinger VPS |
+| Reverse proxy | Caddy sur Hostinger |
+| Livraison | GitHub Actions → GHCR → Hostinger |
+
+## Intégrations externes
+
+Google Analytics, Google Ads, Meta Pixel/CAPI et IMMO PRO-X restent nécessaires au produit, mais ne stockent pas le code, les médias ou la base principale.
+
+## Ce qui est explicitement exclu
+
+- Payload CMS
+- Redis et BullMQ
+- Cloudflare et R2
+- Vercel
+- Firebase
+- Resend et Postmark
+- Sentry
 
 ## Politique de versions
 
 - Node.js 24 LTS.
-- Next.js 16.3.4 et React 19.2.8 au démarrage.
-- Versions exactes pour le runtime.
-- Mises à jour proposées chaque semaine par Dependabot.
-- Les mises à jour majeures exigent une pull request séparée et une recette staging.
-
-## CMS
-
-Payload sera activé après création de PostgreSQL et validation du modèle de données. Le build initial n'exige aucun accès base de données. Ce séquencement empêche la CI d'être liée à des secrets non encore fournis.
-
-## Pas de développement local
-
-GitHub Codespaces constitue l'environnement de développement. GitHub Actions constitue l'environnement de validation, de construction et de déploiement.
+- Dépendances runtime épinglées.
+- Dependabot propose les mises à jour.
+- Toute mise à jour passe par CI et recette staging.

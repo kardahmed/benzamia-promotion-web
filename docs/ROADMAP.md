@@ -4,35 +4,37 @@
 
 - [x] Dépôt GitHub et source de vérité distante
 - [x] Next.js, TypeScript, Docker et Codespaces
-- [x] CI qualité et build
-- [x] Images GHCR et workflows staging/production
+- [x] CI, GHCR et workflows Hostinger
 - [x] Contenu validé de la homepage
-- [ ] Générer et fusionner `package-lock.json` par GitHub Actions
+- [x] Stack limitée à GitHub + Supabase + Hostinger
+- [ ] Créer les projets Supabase staging et production
 - [ ] Créer les GitHub Environments et secrets
+- [ ] Générer le package-lock depuis GitHub Actions
 
-## Phase 1 — Données et CMS
+## Phase 1 — Supabase
 
-- [ ] Modèle Payload/PostgreSQL
-- [ ] Projets, blocs, typologies, lots et statuts
-- [ ] Médias, plans, brochures et visites 360°
-- [ ] Guides, articles, auteurs et redirections
-- [ ] Rôles administrateur, marketing et commercial
+- [ ] Schéma projets, typologies, lots, médias, visites et agents
+- [ ] RLS et rôles du back-office
+- [ ] Buckets images, plans, brochures et visites 360°
+- [ ] Queues IMMO PRO-X, email et conversions
+- [ ] Cron et Edge Functions
+- [ ] Migrations staging puis production via GitHub Actions
 
 ## Phase 2 — Expérience
 
 - [ ] Design system final et monogramme vectoriel
-- [ ] Homepage responsive
+- [ ] Homepage responsive avec médias réels
 - [ ] Catalogue, filtres et pages projet
 - [ ] Visite virtuelle accessible
 - [ ] Guides Investir et blog
-- [ ] États vides, erreurs et chargement
+- [ ] Back-office Supabase Auth
 
 ## Phase 3 — Conversion
 
 - [ ] Réservation avec disponibilités réelles
 - [ ] Adaptateur IMMO PRO-X
-- [ ] Rotation des conseillers
-- [ ] Emails transactionnels
+- [ ] Rotation transactionnelle des conseillers
+- [ ] Email SMTP Hostinger
 - [ ] Déduplication, retries et alertes
 
 ## Phase 4 — Acquisition et qualité
@@ -41,4 +43,4 @@
 - [ ] GA4, Google Ads et Meta Pixel/CAPI
 - [ ] SEO technique, données structurées et redirections
 - [ ] Tests Playwright, accessibilité et Lighthouse
-- [ ] Monitoring, sauvegardes et exercice de rollback
+- [ ] Monitoring Hostinger/Supabase et exercice de rollback
