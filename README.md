@@ -1,13 +1,15 @@
 # BENZAMIA Promotion — plateforme web
 
-Refonte complète de [benzamiapromotion.com](https://benzamiapromotion.com/) avec **GitHub + Supabase + Hostinger** comme stack d'infrastructure unique.
+Refonte complète de [benzamiapromotion.com](https://benzamiapromotion.com/) avec une architecture volontairement simple : **un dépôt GitHub, un projet Supabase avec une seule base PostgreSQL, et un hébergement Hostinger Cloud**.
 
-## Répartition des responsabilités
+## Architecture retenue
 
-- **GitHub** : code, documentation, branches, pull requests, CI/CD, registre Docker et Codespaces.
-- **Supabase** : PostgreSQL, Auth, Storage, API, Queues, Cron et Edge Functions.
-- **Hostinger** : VPS Docker, application Next.js, reverse proxy Caddy, domaine et email professionnel.
-- **Google, Meta et IMMO PRO-X** : intégrations externes, pas fournisseurs d'infrastructure.
+- **GitHub** : le dépôt unique `kardahmed/benzamia-promotion-web`, les branches, pull requests, revues, CI et Codespaces.
+- **Supabase** : un seul projet `benzamia-promotion` et une seule base PostgreSQL pour Auth, Storage, API, Queues, Cron et Edge Functions.
+- **Hostinger Cloud** : application Next.js gérée, déploiement automatique depuis la branche `main`, domaine, SSL, CDN et email professionnel.
+- **Google, Meta et IMMO PRO-X** : intégrations externes au produit, pas fournisseurs d'infrastructure.
+
+Il n'y a pas de second dépôt, pas de seconde base Supabase, pas de VPS, pas de Docker, pas de Caddy et pas de registre d'images GHCR.
 
 ## Objectifs
 
@@ -19,23 +21,24 @@ Refonte complète de [benzamiapromotion.com](https://benzamiapromotion.com/) ave
 - Renforcer le SEO local et la visibilité dans les moteurs de réponse.
 - Publier des guides « Investir à Chlef » et des actualités.
 
-## Développement cloud uniquement
+## Développement et livraison cloud uniquement
 
-- GitHub est la source de vérité.
-- Le travail s'effectue dans GitHub Codespaces ou par agents GitHub.
-- Les migrations Supabase partent de GitHub Actions.
-- Toute évolution passe par une branche et une pull request.
-- Les déploiements partent uniquement de GitHub Actions.
-- Aucun secret ne doit être commité.
+1. Chaque évolution part d'une branche du dépôt unique.
+2. Une pull request déclenche lint, typage, tests et build dans GitHub Actions.
+3. La branche `main` n'accepte que du code validé par la CI.
+4. Hostinger Cloud est connecté à `main` dans hPanel et redéploie automatiquement après fusion.
+5. Les migrations versionnées sont appliquées au projet Supabase unique après approbation.
+6. Aucun secret n'est commité et aucun travail local n'est requis.
 
 ## Documentation
 
 - [Stack technique](docs/STACK.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Déploiement Hostinger Cloud](docs/HOSTINGER-CLOUD.md)
 - [Contenu validé de la homepage](docs/CONTENT-HOMEPAGE.md)
-- [Secrets et environnements](docs/SECRETS.md)
+- [Secrets et environnement](docs/SECRETS.md)
 - [Plan de réalisation](docs/ROADMAP.md)
 
 ## Statut
 
-Fondation technique validée. La connexion au projet Supabase et le déploiement Hostinger restent désactivés jusqu'à la configuration de leurs secrets.
+La fondation Next.js et la CI sont en place. La création du projet Supabase unique et la connexion du dépôt à Hostinger Cloud dans hPanel restent à effectuer avec les accès des comptes concernés.

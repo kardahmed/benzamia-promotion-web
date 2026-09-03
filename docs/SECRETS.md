@@ -1,25 +1,24 @@
-# Secrets — GitHub, Supabase et Hostinger
+# Secrets — environnement de production unique
 
-Créer les GitHub Environments `staging` et `production`. La production exige une approbation manuelle.
-
-## GitHub Actions vers Hostinger
-
-- `HOSTINGER_SSH_HOST`
-- `HOSTINGER_SSH_PORT`
-- `HOSTINGER_SSH_USER`
-- `HOSTINGER_SSH_PRIVATE_KEY`
-- `HOSTINGER_SSH_KNOWN_HOSTS`
-
-Variable : `HOSTINGER_DEPLOY_ENABLED=false` jusqu'à la préparation du VPS.
+Créer un seul GitHub Environment : `production`. Il protège les opérations sensibles, notamment l'application des migrations sur l'unique projet Supabase.
 
 ## GitHub Actions vers Supabase
+
+Ces secrets ciblent tous le même projet `benzamia-promotion` :
 
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_PROJECT_REF`
 - `SUPABASE_DB_PASSWORD`
 
-## Runtime Hostinger
+Aucun jeu de secrets staging et aucune seconde référence de projet ne sont nécessaires.
 
+## Runtime Hostinger Cloud
+
+Configurer dans hPanel, pour l'application Node.js :
+
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_GTM_ID`
+- `NEXT_PUBLIC_META_PIXEL_ID`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SECRET_KEY`
@@ -31,5 +30,11 @@ Variable : `HOSTINGER_DEPLOY_ENABLED=false` jusqu'à la préparation du VPS.
 - `HOSTINGER_SMTP_PORT`
 - `HOSTINGER_SMTP_USER`
 - `HOSTINGER_SMTP_PASSWORD`
+- `EMAIL_FROM`
+- `CONTACT_RECIPIENT`
 
-Les secrets serveur restent dans `/opt/benzamia/{staging|production}/.env` avec permissions restreintes. La clé Supabase secrète et les mots de passe SMTP ne sont jamais préfixés par `NEXT_PUBLIC_`.
+La clé Supabase secrète, la connexion PostgreSQL, les identifiants IMMO PRO-X et le mot de passe SMTP ne doivent jamais être préfixés par `NEXT_PUBLIC_`.
+
+## Déploiement Hostinger
+
+Le CD utilise la connexion GitHub native de hPanel sur la branche `main`. Il ne nécessite pas de clé SSH, de secret VPS, de registre Docker ou de webhook stocké dans le dépôt.
