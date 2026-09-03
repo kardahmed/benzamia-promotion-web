@@ -1,6 +1,13 @@
 # BENZAMIA Promotion — plateforme web
 
-Refonte complète de [benzamiapromotion.com](https://benzamiapromotion.com/) avec GitHub comme source de vérité et une chaîne CI/CD sans développement local.
+Refonte complète de [benzamiapromotion.com](https://benzamiapromotion.com/) avec **GitHub + Supabase + Hostinger** comme stack d'infrastructure unique.
+
+## Répartition des responsabilités
+
+- **GitHub** : code, documentation, branches, pull requests, CI/CD, registre Docker et Codespaces.
+- **Supabase** : PostgreSQL, Auth, Storage, API, Queues, Cron et Edge Functions.
+- **Hostinger** : VPS Docker, application Next.js, reverse proxy Caddy, domaine et email professionnel.
+- **Google, Meta et IMMO PRO-X** : intégrations externes, pas fournisseurs d'infrastructure.
 
 ## Objectifs
 
@@ -16,26 +23,10 @@ Refonte complète de [benzamiapromotion.com](https://benzamiapromotion.com/) ave
 
 - GitHub est la source de vérité.
 - Le travail s'effectue dans GitHub Codespaces ou par agents GitHub.
+- Les migrations Supabase partent de GitHub Actions.
 - Toute évolution passe par une branche et une pull request.
-- La CI bloque les régressions avant fusion.
 - Les déploiements partent uniquement de GitHub Actions.
 - Aucun secret ne doit être commité.
-
-## Démarrage dans Codespaces
-
-1. Ouvrir **Code → Codespaces → Create codespace on main**.
-2. Le conteneur cloud installe Node.js 24 et les dépendances.
-3. Utiliser `npm run dev` dans le terminal du Codespace.
-
-## Commandes
-
-```bash
-npm run dev
-npm run lint
-npm run typecheck
-npm test
-npm run build
-```
 
 ## Documentation
 
@@ -47,4 +38,4 @@ npm run build
 
 ## Statut
 
-Fondation technique. Les intégrations externes restent désactivées jusqu'à la fourniture et la validation des accès IMMO PRO-X, email, Google, Meta et Hostinger.
+Fondation technique validée. La connexion au projet Supabase et le déploiement Hostinger restent désactivés jusqu'à la configuration de leurs secrets.

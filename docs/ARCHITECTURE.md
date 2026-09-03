@@ -1,37 +1,37 @@
-# Architecture
+# Architecture GitHub + Supabase + Hostinger
 
-## Flux de publication
+## Flux de livraison
 
-1. Une branche est créée depuis `main`.
-2. Une pull request déclenche lint, typage, tests et build.
-3. Après fusion, GitHub Actions construit une image Docker identifiée par le SHA.
-4. L'image est publiée dans GHCR et déployée automatiquement en staging.
-5. La recette staging valide les parcours, le tracking et les intégrations.
-6. La production utilise exactement le tag testé, après approbation de l'environnement `production`.
-7. Un rollback réutilise le tag GHCR précédent.
+1. Une branche et une pull request sont créées dans GitHub.
+2. GitHub Actions exécute lint, typage, tests et build.
+3. Les migrations validées sont appliquées au projet Supabase de staging.
+4. Après fusion, GitHub Actions construit une image Docker immuable dans GHCR.
+5. Hostinger VPS déploie cette image sur le domaine de staging.
+6. La production utilise exactement le tag testé, après approbation GitHub Environment.
+7. Le rollback redéploie le tag GHCR précédent.
 
-## Domaines applicatifs
+## Supabase
 
-- **Catalogue immobilier** : projets, blocs, typologies, lots, équipements et disponibilité.
-- **Médias** : galeries, plans, brochures, vidéos et visites 360°.
-- **Réservation** : créneaux, coordonnées, consentement, confirmation et annulation.
-- **CRM** : création de prospect IMMO PRO-X, déduplication et attribution par rotation.
-- **Marketing** : UTM, gclid/fbclid, GA4, Google Ads, Meta Pixel/CAPI et consentement.
-- **Éditorial** : guides « Investir à Chlef », actualités et avancement de chantier.
+- **PostgreSQL** : projets, typologies, lots, statuts, demandes, agents et journal d'intégration.
+- **Auth** : accès au back-office et rôles administrateur, marketing et commercial.
+- **Storage** : images, plans, brochures, vidéos et panoramas 360°.
+- **Queues** : création IMMO PRO-X, emails, Meta CAPI et reprises après incident.
+- **Cron** : consommation des files, relances et contrôles de cohérence.
+- **Edge Functions** : webhooks et traitements asynchrones.
+- **RLS** : lecture publique limitée aux contenus publiés ; données personnelles interdites au rôle anonyme.
 
-## Intégration IMMO PRO-X
+## Hostinger
 
-L'adaptateur doit être idempotent. Chaque demande reçoit un identifiant interne avant l'appel CRM. Les erreurs temporaires vont dans une file Redis avec backoff. Les erreurs définitives sont journalisées et alertées. Aucun endpoint ou champ métier non documenté ne sera inventé.
+Hostinger exécute l'application Next.js en Docker avec Caddy. L'application sert le site public, le back-office et les routes serveur. L'email transactionnel utilise le SMTP Hostinger. Aucun service de données durable ne réside dans le conteneur web.
+
+## IMMO PRO-X
+
+Chaque réservation est d'abord enregistrée dans Supabase avec un identifiant d'idempotence. Une entrée Supabase Queue déclenche ensuite la création du prospect dans IMMO PRO-X. Les reprises sont archivées et les erreurs définitives deviennent visibles dans le back-office.
 
 ## Rotation commerciale
 
-La rotation doit prendre en compte : agents actifs, projet autorisé, horaires, plafond de charge, dernière attribution et indisponibilités. Chaque décision d'attribution est traçable et rejouable.
+La transaction d'attribution s'exécute dans PostgreSQL afin d'éviter les doubles attributions. Elle considère les agents actifs, projets autorisés, horaires, charge, dernière attribution et indisponibilités.
 
-## Données personnelles
+## Google et Meta
 
-- Consentement séparé pour la demande et la prospection.
-- Minimisation des données.
-- Chiffrement en transit et au repos.
-- Durées de conservation configurables.
-- Suppression/export par processus administratif.
-- Les données de formulaire ne sont jamais écrites dans les logs CI.
+Le navigateur envoie uniquement les événements autorisés par le consentement. Les conversions serveur sont placées dans Supabase Queues puis envoyées par une Edge Function, sans exposer les secrets au navigateur.

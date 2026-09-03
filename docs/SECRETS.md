@@ -1,12 +1,8 @@
-# Secrets et environnements GitHub
+# Secrets — GitHub, Supabase et Hostinger
 
-Créer deux GitHub Environments : `staging` et `production`. La production doit exiger une approbation manuelle.
+Créer les GitHub Environments `staging` et `production`. La production exige une approbation manuelle.
 
-## Variable de dépôt
-
-`HOSTINGER_DEPLOY_ENABLED=false` tant que le serveur n'est pas préparé, puis `true`.
-
-## Secrets Hostinger par environnement
+## GitHub Actions vers Hostinger
 
 - `HOSTINGER_SSH_HOST`
 - `HOSTINGER_SSH_PORT`
@@ -14,20 +10,26 @@ Créer deux GitHub Environments : `staging` et `production`. La production doit 
 - `HOSTINGER_SSH_PRIVATE_KEY`
 - `HOSTINGER_SSH_KNOWN_HOSTS`
 
-## Secrets applicatifs sur le serveur
+Variable : `HOSTINGER_DEPLOY_ENABLED=false` jusqu'à la préparation du VPS.
 
-Ils restent dans `/opt/benzamia/{staging|production}/.env`, avec permissions restreintes :
+## GitHub Actions vers Supabase
 
-- `DATABASE_URL`
-- `REDIS_URL`
+- `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_PROJECT_REF`
+- `SUPABASE_DB_PASSWORD`
+
+## Runtime Hostinger
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY`
+- `SUPABASE_DATABASE_URL`
 - `IMMOPROX_API_URL`
 - `IMMOPROX_API_KEY`
 - `IMMOPROX_WEBHOOK_SECRET`
-- `EMAIL_API_KEY`
-- `SENTRY_DSN`
+- `HOSTINGER_SMTP_HOST`
+- `HOSTINGER_SMTP_PORT`
+- `HOSTINGER_SMTP_USER`
+- `HOSTINGER_SMTP_PASSWORD`
 
-Les jetons serveur, clés CAPI et secrets webhook ne doivent jamais être exposés au navigateur.
-
-## Préparation VPS
-
-Créer `/opt/benzamia/staging` et `/opt/benzamia/production`, puis y placer `docker-compose.deploy.yml`, `Caddyfile` et le fichier `.env` correspondant. Le compte SSH de déploiement doit être limité à ce périmètre.
+Les secrets serveur restent dans `/opt/benzamia/{staging|production}/.env` avec permissions restreintes. La clé Supabase secrète et les mots de passe SMTP ne sont jamais préfixés par `NEXT_PUBLIC_`.
