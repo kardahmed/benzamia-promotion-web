@@ -22,10 +22,21 @@ Le dépôt ne contient que l'**intégration** (`src/components/virtual-tour-embe
 
 ## Où l'héberger
 
-**Décision (2026-09-07) : Option B — sous-domaine statique Hostinger
-`visite.benzamiapromotion.com`.** L'option A reste documentée pour référence.
+**En production (2026-09-07) : GitHub Pages.** Dépôt public dédié
+`kardahmed/benzamia-360` (≈28 000 fichiers de `EXPORT.zip` + un `.nojekyll`),
+servi sur **`https://kardahmed.github.io/benzamia-360/index.htm`** (CDN GitHub,
+HTTPS, gratuit). C'est la valeur par défaut de `virtualTour.url` dans
+`src/content/site.ts` — aucune variable d'environnement à configurer.
 
-### Option B — Sous-domaine statique Hostinger *(retenue)*
+Pour **basculer vers un autre hôte** (sous-domaine Hostinger ci-dessous, ou
+Supabase Storage), renseigner `NEXT_PUBLIC_VIRTUAL_TOUR_URL` et redéployer.
+`NEXT_PUBLIC_VIRTUAL_TOUR_URL=off` force l'état « bientôt disponible ».
+
+Pour **mettre à jour la visite** : remplacer le contenu du dépôt
+`kardahmed/benzamia-360` par le nouvel export (garder `.nojekyll`), pousser sur
+`main` → GitHub Pages se reconstruit tout seul.
+
+### Option B — Sous-domaine statique Hostinger *(alternative)*
 
 1. hPanel → **Sous-domaines** → créer `visite.benzamiapromotion.com`
    (docroot dédié, p. ex. `domains/visite.benzamiapromotion.com/public_html`).

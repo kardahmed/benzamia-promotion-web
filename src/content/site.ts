@@ -63,13 +63,18 @@ export const contact = {
 
 /**
  * Visite virtuelle 3DVista (export « BENZAMIA Promotion 360° »).
- * Les fichiers (~120 Mo, 29 000 fichiers) sont hébergés HORS du dépôt :
- * bucket Supabase Storage public ou sous-domaine statique Hostinger
- * (voir docs/VISITE-VIRTUELLE.md). `NEXT_PUBLIC_VIRTUAL_TOUR_URL` doit
- * pointer vers le `index.htm` de la visite. Tant qu'il est vide, la page
- * affiche un état « bientôt disponible ».
+ * Les ~28 000 fichiers sont hébergés HORS du dépôt applicatif — voir
+ * docs/VISITE-VIRTUELLE.md. Hébergement actuel : GitHub Pages
+ * (dépôt kardahmed/benzamia-360). `NEXT_PUBLIC_VIRTUAL_TOUR_URL` permet de
+ * basculer vers un autre hôte (ex. sous-domaine Hostinger) sans redéployer
+ * le code. Mettre la variable à `off` force l'état « bientôt disponible ».
  */
-const virtualTourUrl = process.env.NEXT_PUBLIC_VIRTUAL_TOUR_URL ?? "";
+const VIRTUAL_TOUR_DEFAULT = "https://kardahmed.github.io/benzamia-360/index.htm";
+const virtualTourEnv = process.env.NEXT_PUBLIC_VIRTUAL_TOUR_URL ?? "";
+const virtualTourUrl =
+  virtualTourEnv === "off"
+    ? ""
+    : virtualTourEnv || VIRTUAL_TOUR_DEFAULT;
 export const virtualTour = {
   url: virtualTourUrl,
   enabled: virtualTourUrl.length > 0,
