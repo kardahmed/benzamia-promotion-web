@@ -4,10 +4,14 @@
 
 Fichier fourni : `EXPORT.zip` — visite **3DVista** « BENZAMIA Promotion 360° ».
 
-- ~120 Mo décompressé, **29 644 fichiers** (tuiles cube `webp`, `lib/tdvplayer.js`, `script*.js`, `skin/`, `locale/fr.txt`).
-- 47 panoramas : hall, séjour/salon, chambres, cuisine, salle de bain — appartements témoins **Résidence La Cité** et **Résidence Azhar II** (une seule visite combinée).
-- Point d'entrée : `EXPORT/index.htm`.
+- ~120 Mo décompressé, **~28 000 fichiers** (tuiles cube `webp`, `lib/tdvplayer.js`, `script*.js`, `skin/`, `locale/fr.txt`).
+- 47 panoramas : **appartements témoins F3 et F4 de la Résidence La Cité** (réception, entrée, séjour/salon, cuisine, chambre parentale / junior / enfant, salle de bain). Azhar II n'est **pas** dans cette visite.
+- Point d'entrée : `EXPORT/index.htm`. Éditeur : discoverin360.com (3DVista).
 - Statique pur : aucun serveur applicatif requis, se sert depuis n'importe quel hébergement de fichiers.
+- ⚠️ La visite contient des liens internes vers l'**ancienne** arborescence
+  `benzamiapromotion.com/nos-projets/residence-la-cite/` → couverts par les
+  redirections 301 `/nos-projets/*` → `/projets/*` (`src/content/legacy-redirects.ts`).
+  Elle embarque aussi une carte Google Maps (résidence la cité).
 
 ## Pourquoi ce n'est PAS dans le dépôt
 

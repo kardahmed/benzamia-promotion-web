@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { virtualTour } from "@/content/site";
 import { track } from "@/lib/analytics";
+import { ArrowUpRight } from "./icons";
 import { MediaPlaceholder } from "./media-placeholder";
 
 /**
@@ -11,7 +12,7 @@ import { MediaPlaceholder } from "./media-placeholder";
  * - l'iframe ne se charge qu'au clic (rien avant) ;
  * - image de remplacement si aucune visite n'est configurée ;
  * - plein écran autorisé ;
- * - `start_virtual_tour` mesuré au lancement.
+ * - `start_virtual_tour` mesuré au lancement et à l'ouverture plein écran.
  * Les fichiers de la visite (~120 Mo) sont hébergés hors du dépôt —
  * voir docs/VISITE-VIRTUELLE.md.
  */
@@ -25,7 +26,7 @@ export function VirtualTourEmbed({
 
   return (
     <figure className="m-0">
-      <div className="relative aspect-video overflow-hidden rounded-3xl border border-hairline bg-ink">
+      <div className="relative aspect-video min-h-[420px] overflow-hidden rounded-3xl border border-hairline bg-ink lg:min-h-[600px]">
         {started && ready ? (
           <iframe
             src={virtualTour.url}
@@ -67,7 +68,7 @@ export function VirtualTourEmbed({
                   >
                     <span
                       aria-hidden
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white"
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-xs text-white"
                     >
                       ▶
                     </span>
@@ -88,9 +89,29 @@ export function VirtualTourEmbed({
           </>
         )}
       </div>
-      <figcaption className="mt-3 text-xs text-grey">
-        Visite des appartements témoins Résidence La Cité et Résidence Azhar II.
-        Une image de remplacement s’affiche si un panorama ne se charge pas.
+
+      <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-xs text-grey">
+        <span>
+          Appartements témoins F3 et F4 de la Résidence La Cité. Une image de
+          remplacement s’affiche si un panorama ne se charge pas.
+        </span>
+        {started && ready && (
+          <a
+            href={virtualTour.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              track("start_virtual_tour", {
+                location,
+                interaction: "new_tab",
+              })
+            }
+            className="inline-flex shrink-0 items-center gap-1 font-medium text-brand"
+          >
+            Ouvrir dans un nouvel onglet
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
+        )}
       </figcaption>
     </figure>
   );

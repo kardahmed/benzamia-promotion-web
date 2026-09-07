@@ -9,5 +9,9 @@
 export type LegacyRedirect = { source: string; destination: string; permanent: boolean };
 
 export const legacyRedirects: LegacyRedirect[] = [
-  // Exemple : { source: "/nos-projets", destination: "/projets", permanent: true },
+  // Ancienne arborescence /nos-projets/* → /projets/* (référencée depuis la
+  // visite virtuelle 3DVista et l'ancien site).
+  { source: "/nos-projets", destination: "/projets", permanent: true },
+  { source: "/nos-projets/:slug*", destination: "/projets/:slug*", permanent: true },
+  // À COMPLÉTER après le crawl complet de l'ancien site + Search Console.
 ];

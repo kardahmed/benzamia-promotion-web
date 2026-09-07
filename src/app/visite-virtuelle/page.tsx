@@ -18,7 +18,7 @@ export default function VisiteVirtuellePage() {
       <PageIntro
         eyebrow="Visite virtuelle"
         title="Visitez le projet avant de vous déplacer."
-        lead="Parcourez les espaces à 360°, observez les volumes et découvrez l’organisation des pièces depuis votre téléphone ou votre ordinateur. Vous pourrez ensuite choisir un créneau pour visiter le projet sur place."
+        lead="Parcourez les appartements témoins à 360°, observez les volumes et découvrez l’organisation des pièces depuis votre téléphone ou votre ordinateur. Vous pourrez ensuite choisir un créneau pour visiter le projet sur place."
       />
 
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
@@ -33,6 +33,11 @@ export default function VisiteVirtuellePage() {
               <div>
                 <p className="font-medium text-ink">{p.name}</p>
                 <p className="text-sm text-grey">{p.location}</p>
+                <p className="mt-1 text-xs text-grey">
+                  {p.hasVirtualTour
+                    ? "Appartements témoins F3 et F4 disponibles en 360°"
+                    : "Visite virtuelle à venir"}
+                </p>
               </div>
               <SecondaryButton href={`${routes.projets}/${p.slug}`}>
                 Le programme

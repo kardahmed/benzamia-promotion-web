@@ -22,6 +22,8 @@ export type Project = {
   features: ProjectFeature[];
   /** Rendu de présentation, hébergé dans `public/projets/<slug>/`. */
   cover?: ProjectImage;
+  /** Une visite virtuelle 3DVista couvre ce programme (appartements témoins). */
+  hasVirtualTour?: boolean;
   /** Nombre de vignettes de galerie provisoires à afficher (fallback sans photo). */
   gallery: number;
 };
@@ -53,6 +55,7 @@ export const projects: Project[] = [
       { label: "Visiophone", pending: true },
       { label: "Double ascenseur par bloc", pending: true },
     ],
+    hasVirtualTour: true,
     gallery: 4,
   },
   {

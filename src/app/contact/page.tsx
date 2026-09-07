@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/page-intro";
 import { ContactForm } from "@/components/contact-form";
+import { LocationMap } from "@/components/location-map";
 import { PrimaryButton } from "@/components/cta";
 import { contact, routes, telHref } from "@/content/site";
 
@@ -57,14 +58,17 @@ export default function ContactPage() {
               </dd>
             </div>
             <div>
-              <dt className="text-grey">Bureau de vente</dt>
-              <dd className="text-ink">{contact.city}</dd>
+              <dt className="text-grey">Siège &amp; bureau de vente</dt>
+              <dd className="text-ink">{contact.salesOffice}</dd>
             </div>
             <div>
               <dt className="text-grey">Horaires</dt>
               <dd className="text-ink">{contact.hours}</dd>
             </div>
           </dl>
+
+          <LocationMap className="mt-6" />
+
           <div className="mt-6">
             <PrimaryButton href={routes.reserver} className="w-full">
               Réserver une visite

@@ -54,6 +54,12 @@ export function organizationJsonLd() {
       addressLocality: "Chlef",
       addressCountry: "DZ",
     },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: contact.map.lat,
+      longitude: contact.map.lng,
+    },
+    hasMap: contact.map.link,
     contactPoint: contact.phones.map((telephone) => ({
       "@type": "ContactPoint",
       telephone,

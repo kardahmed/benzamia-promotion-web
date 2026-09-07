@@ -81,9 +81,11 @@ export default async function ProjectPage({
       >
         <div className="flex flex-wrap gap-3">
           <PrimaryButton href={routes.reserver}>Réserver une visite</PrimaryButton>
-          <SecondaryButton href={routes.visiteVirtuelle}>
-            Visite virtuelle
-          </SecondaryButton>
+          {project.hasVirtualTour && (
+            <SecondaryButton href={routes.visiteVirtuelle}>
+              Visite virtuelle
+            </SecondaryButton>
+          )}
         </div>
       </PageIntro>
 
