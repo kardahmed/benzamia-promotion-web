@@ -2,8 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
+import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
 
 type Status = "idle" | "sending" | "sent" | "error";
+
+/** Première date sélectionnable : 24 h après maintenant (format YYYY-MM-DD). */
+const minBookingDate = new Date(Date.now() + BOOKING_MIN_LEAD_HOURS * 3600 * 1000)
+  .toISOString()
+  .slice(0, 10);
 
 const field =
   "w-full rounded-lg border border-hairline bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-ink";
@@ -62,10 +68,10 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   if (status === "sent") {
     return (
       <div className="rounded-2xl border border-hairline bg-ivory p-6">
-        <p className="font-medium text-ink">Demande enregistrée.</p>
+        <p className="font-medium text-ink">Demande envoyée.</p>
         <p className="mt-2 text-sm text-graphite">
-          Nous vous recontactons pour confirmer le rendez-vous et vous
-          communiquer les informations de visite.
+          Un conseiller BENZAMIA vous recontacte pour confirmer le rendez-vous.
+          Les visites ont lieu au bureau de vente : {contact.salesOffice}.
         </p>
         <button
           type="button"
@@ -80,6 +86,12 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-5">
+      <p className="rounded-lg bg-ivory px-3 py-2.5 text-xs text-graphite">
+        Visites au bureau de vente : {contact.salesOffice}. Créneaux à réserver
+        au moins {BOOKING_MIN_LEAD_HOURS} h à l’avance ; un conseiller confirme
+        le rendez-vous.
+      </p>
+
       <div className="grid gap-1.5">
         <label className={labelCls} htmlFor="projectSlug">
           Projet
@@ -114,7 +126,14 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
           <label className={labelCls} htmlFor="preferredDate">
             Date souhaitée
           </label>
-          <input id="preferredDate" name="preferredDate" type="date" required className={field} />
+          <input
+            id="preferredDate"
+            name="preferredDate"
+            type="date"
+            required
+            min={minBookingDate}
+            className={field}
+          />
         </div>
         <div className="grid gap-1.5">
           <label className={labelCls} htmlFor="preferredTime">

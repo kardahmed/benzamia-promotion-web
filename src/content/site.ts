@@ -37,9 +37,14 @@ export const contact = {
   email: "contact@benzamiapromotion.com",
   phones: ["+213 561 73 97 62", "+213 560 43 92 22", "+213 560 50 64 39"],
   city: "Chlef, Algérie",
+  /** Lieu de toutes les visites : le bureau de vente, jamais le chantier. */
+  salesOffice: "Cité 20 Août 1955, Chlef",
   hours: "Samedi – jeudi, 9h – 17h",
   signature: "Bâtir haut, tenir parole.",
 } as const;
+
+/** Délai minimum entre une demande et le créneau de visite (heures). */
+export const BOOKING_MIN_LEAD_HOURS = 24;
 
 /** Numéro au format lien `tel:` (chiffres et « + » uniquement). */
 export const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
