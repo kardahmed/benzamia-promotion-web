@@ -24,7 +24,7 @@ export default async function ReserverPage({
       <PageIntro
         eyebrow="Réservation"
         title="Choisissez le projet, puis le créneau qui vous convient."
-        lead="Indiquez la résidence qui vous intéresse et sélectionnez une date disponible. Votre demande sera enregistrée dans IMMO PRO-X et confiée à un conseiller disponible. Vous recevrez ensuite les informations nécessaires pour votre visite."
+        lead="Indiquez la résidence qui vous intéresse et sélectionnez une date disponible. Nous vous recontactons rapidement pour confirmer le rendez-vous et vous communiquer les informations utiles à votre visite."
       />
       <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <BookingForm defaultProject={defaultProject} />

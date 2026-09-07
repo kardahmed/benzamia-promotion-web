@@ -33,10 +33,7 @@ export default function ConfidentialitePage() {
         <ul>
           <li>traiter votre demande de visite ou votre message ;</li>
           <li>vous recontacter via le canal que vous avez choisi ;</li>
-          <li>
-            transmettre votre demande à l’équipe commerciale via l’outil IMMO
-            PRO-X.
-          </li>
+          <li>transmettre votre demande à l’équipe commerciale BENZAMIA.</li>
         </ul>
 
         <h2>Conservation</h2>

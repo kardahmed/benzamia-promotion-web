@@ -18,5 +18,7 @@ test("le contenu éditorial approuvé reste présent", async () => {
   assert.match(source, /Venez visiter nos projets à Chlef/);
   assert.match(source, /Résidence La Cité/);
   assert.match(source, /Résidence Azhar II/);
-  assert.match(source, /IMMO PRO-X/);
+  assert.match(source, /Choisir un créneau/);
+  // Aucun nom d'outil interne ne doit apparaître dans le contenu public.
+  assert.doesNotMatch(source, /IMMO\s?PRO-?X/i);
 });

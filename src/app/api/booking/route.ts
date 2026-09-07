@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 /**
  * Réception d'une demande de visite.
  * TODO (phase 3) : idempotence + persistance Supabase, mise en file d'attente
- * vers IMMO PRO-X, rotation transactionnelle des conseillers, email SMTP
- * Hostinger. Pour l'instant : validation des champs uniquement.
+ * vers le CRM commercial, rotation des conseillers, email SMTP Hostinger.
+ * Pour l'instant : validation des champs uniquement.
  */
 export async function POST(request: Request) {
   let body: Record<string, unknown>;

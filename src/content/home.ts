@@ -67,7 +67,7 @@ export const homeContent = {
   booking: {
     title: "Choisissez le projet, puis le créneau qui vous convient.",
     description:
-      "Indiquez la résidence qui vous intéresse et sélectionnez une date disponible. Votre demande sera enregistrée dans IMMO PRO-X et confiée à un conseiller disponible. Vous recevrez ensuite les informations nécessaires pour votre visite.",
+      "Indiquez la résidence qui vous intéresse et sélectionnez une date disponible. Nous vous recontactons rapidement pour confirmer le rendez-vous et vous communiquer les informations utiles à votre visite.",
     action: "Choisir un créneau",
   },
   invest: {

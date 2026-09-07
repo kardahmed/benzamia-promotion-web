@@ -64,8 +64,8 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
       <div className="rounded-2xl border border-hairline bg-ivory p-6">
         <p className="font-medium text-ink">Demande enregistrée.</p>
         <p className="mt-2 text-sm text-graphite">
-          Un conseiller BENZAMIA vous recontacte pour confirmer le créneau et
-          vous transmettre les informations de visite.
+          Nous vous recontactons pour confirmer le rendez-vous et vous
+          communiquer les informations de visite.
         </p>
         <button
           type="button"
@@ -201,8 +201,8 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
       </button>
 
       <p className="text-xs text-grey">
-        Votre demande sera transmise à l’équipe commerciale BENZAMIA via IMMO
-        PRO-X. Aucune donnée de paiement n’est demandée.
+        Votre demande est transmise à l’équipe commerciale BENZAMIA. Aucune
+        donnée de paiement n’est demandée.
       </p>
     </form>
   );
