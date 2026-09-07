@@ -35,7 +35,11 @@ export const contact = {
   company: "BENZAMIA Promotion",
   since: 2013,
   email: "contact@benzamiapromotion.com",
+  phones: ["+213 561 73 97 62", "+213 560 43 92 22", "+213 560 50 64 39"],
   city: "Chlef, Algérie",
   hours: "Samedi – jeudi, 9h – 17h",
   signature: "Bâtir haut, tenir parole.",
 } as const;
+
+/** Numéro au format lien `tel:` (chiffres et « + » uniquement). */
+export const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;

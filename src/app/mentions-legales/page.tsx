@@ -23,7 +23,8 @@ export default function MentionsLegalesPage() {
         <h2>Éditeur du site</h2>
         <p>
           {contact.company} — {contact.city}. Courriel :{" "}
-          <a href={`mailto:${contact.email}`}>{contact.email}</a>.
+          <a href={`mailto:${contact.email}`}>{contact.email}</a>. Téléphone :{" "}
+          {contact.phones.join(" · ")}.
         </p>
 
         <h2>Hébergement</h2>

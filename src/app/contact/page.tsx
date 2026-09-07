@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/page-intro";
 import { ContactForm } from "@/components/contact-form";
 import { PrimaryButton } from "@/components/cta";
-import { contact, routes } from "@/content/site";
+import { contact, routes, telHref } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -40,6 +40,20 @@ export default function ContactPage() {
                 <a href={`mailto:${contact.email}`} className="text-brand underline">
                   {contact.email}
                 </a>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-grey">Téléphone</dt>
+              <dd className="space-y-1">
+                {contact.phones.map((phone) => (
+                  <a
+                    key={phone}
+                    href={telHref(phone)}
+                    className="block text-ink hover:text-brand"
+                  >
+                    {phone}
+                  </a>
+                ))}
               </dd>
             </div>
             <div>

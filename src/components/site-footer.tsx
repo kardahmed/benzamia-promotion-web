@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { primaryNav, legalNav, bookingCta, contact } from "@/content/site";
+import {
+  primaryNav,
+  legalNav,
+  bookingCta,
+  contact,
+  telHref,
+} from "@/content/site";
 import { Logo } from "./brand";
 
 export function SiteFooter() {
@@ -40,6 +46,13 @@ export function SiteFooter() {
                   {contact.email}
                 </a>
               </li>
+              {contact.phones.map((phone) => (
+                <li key={phone}>
+                  <a href={telHref(phone)} className="hover:text-white">
+                    {phone}
+                  </a>
+                </li>
+              ))}
               <li>{contact.hours}</li>
             </ul>
           </div>
