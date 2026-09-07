@@ -16,9 +16,40 @@ Fichier fourni : `EXPORT.zip` — visite **3DVista** « BENZAMIA Promotion 360°
 
 Le dépôt ne contient que l'**intégration** (`src/components/virtual-tour-embed.tsx`) et une image d'aperçu légère (`public/visite-virtuelle/poster.jpg`).
 
-## Où l'héberger — deux options
+## Où l'héberger
 
-### Option A — Supabase Storage (aligné CDC)
+**Décision (2026-09-07) : Option B — sous-domaine statique Hostinger
+`visite.benzamiapromotion.com`.** L'option A reste documentée pour référence.
+
+### Option B — Sous-domaine statique Hostinger *(retenue)*
+
+1. hPanel → **Sous-domaines** → créer `visite.benzamiapromotion.com`
+   (docroot dédié, p. ex. `domains/visite.benzamiapromotion.com/public_html`).
+2. Uploader `EXPORT.zip` dans ce docroot via le **Gestionnaire de fichiers**,
+   puis **Extraire** — le contenu de `EXPORT/` doit se retrouver **à la racine**
+   du sous-domaine (`index.htm` directement accessible, pas `EXPORT/index.htm`).
+3. Vérifier : `https://visite.benzamiapromotion.com/index.htm` s'ouvre et la
+   visite tourne. Activer le SSL du sous-domaine dans hPanel.
+4. Renseigner la variable côté application principale :
+   - **Prod** : hPanel → variables d'environnement de l'app Node →
+     `NEXT_PUBLIC_VIRTUAL_TOUR_URL=https://visite.benzamiapromotion.com/index.htm`
+   - **Local** : `.env.local` avec la même ligne.
+5. Redéployer / rebuild l'app principale (la variable est `NEXT_PUBLIC_`, elle
+   est injectée au build).
+
+**Piège `X-Frame-Options`.** Le site principal envoie `X-Frame-Options: SAMEORIGIN`
+sur toutes ses pages (`next.config.ts`) — cela concerne le fait *d'être* mis en
+iframe, pas *d'en* afficher une, donc l'embed fonctionne. En revanche si
+Hostinger ajoute par défaut `X-Frame-Options: SAMEORIGIN` **sur le sous-domaine**,
+l'iframe restera blanche. Dans ce cas, sur le sous-domaine uniquement, ajouter un
+`.htaccess` :
+
+```apache
+Header always unset X-Frame-Options
+Header always set Content-Security-Policy "frame-ancestors 'self' https://benzamiapromotion.com https://www.benzamiapromotion.com"
+```
+
+### Option A — Supabase Storage (non retenue pour l'instant)
 
 1. Projet Supabase unique `benzamia-promotion` → **Storage** → bucket **public** `tours`.
 2. Uploader le contenu de `EXPORT/` sous `tours/benzamia-360/` (conserver l'arborescence).
@@ -32,14 +63,6 @@ Le dépôt ne contient que l'**intégration** (`src/components/virtual-tour-embe
    `https://<project-ref>.supabase.co/storage/v1/object/public/tours/benzamia-360/index.htm`
 
 Cache : Storage sert avec `cache-control` par défaut court — pousser `--cache-control 3600` (ou plus) sur l'upload pour les assets immuables.
-
-### Option B — Sous-domaine statique Hostinger
-
-1. Créer `visite.benzamiapromotion.com` dans hPanel (hébergement statique / dossier `public_html` dédié).
-2. Décompresser `EXPORT/` à la racine de ce sous-domaine.
-3. `NEXT_PUBLIC_VIRTUAL_TOUR_URL` = `https://visite.benzamiapromotion.com/index.htm`
-
-Plus simple à mettre en cache (CDN Hostinger), et ne dépend pas de la création du projet Supabase.
 
 ## Intégration dans le site (déjà en place)
 
