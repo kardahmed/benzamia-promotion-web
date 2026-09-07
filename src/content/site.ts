@@ -43,6 +43,20 @@ export const contact = {
   signature: "Bâtir haut, tenir parole.",
 } as const;
 
+/**
+ * Visite virtuelle 3DVista (export « BENZAMIA Promotion 360° »).
+ * Les fichiers (~120 Mo, 29 000 fichiers) sont hébergés HORS du dépôt :
+ * bucket Supabase Storage public ou sous-domaine statique Hostinger
+ * (voir docs/VISITE-VIRTUELLE.md). `NEXT_PUBLIC_VIRTUAL_TOUR_URL` doit
+ * pointer vers le `index.htm` de la visite. Tant qu'il est vide, la page
+ * affiche un état « bientôt disponible ».
+ */
+const virtualTourUrl = process.env.NEXT_PUBLIC_VIRTUAL_TOUR_URL ?? "";
+export const virtualTour = {
+  url: virtualTourUrl,
+  enabled: virtualTourUrl.length > 0,
+} as const;
+
 /** Délai minimum entre une demande et le créneau de visite (heures). */
 export const BOOKING_MIN_LEAD_HOURS = 24;
 

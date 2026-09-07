@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/page-intro";
-import { MediaPlaceholder } from "@/components/media-placeholder";
+import { VirtualTourEmbed } from "@/components/virtual-tour-embed";
 import { PrimaryButton, SecondaryButton } from "@/components/cta";
 import { projects } from "@/content/projects";
 import { routes } from "@/content/site";
@@ -22,19 +22,7 @@ export default function VisiteVirtuellePage() {
       />
 
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="relative aspect-video overflow-hidden rounded-3xl border border-hairline">
-          <MediaPlaceholder tone="ink" label="Visite 360° — chargement à la demande" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-ink">
-              Panoramas en cours de préparation
-            </span>
-          </div>
-        </div>
-        <p className="mt-3 text-xs text-grey">
-          La visite 360° se chargera uniquement lorsque vous la lancerez, pour ne
-          pas ralentir la navigation. Une image de remplacement s’affiche si le
-          panorama ne se charge pas.
-        </p>
+        <VirtualTourEmbed location="page_visite" />
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {projects.map((p) => (

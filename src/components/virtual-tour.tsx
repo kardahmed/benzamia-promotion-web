@@ -25,9 +25,10 @@ export function VirtualTour() {
           <h2 className="text-3xl leading-[1.08] text-white sm:text-4xl">{title}</h2>
           <p className="text-white/70">{description}</p>
           <PrimaryButton
-            href={routes.reserver}
+            href={routes.visiteVirtuelle}
             data-analytics-event="start_virtual_tour"
             data-analytics-location="accueil"
+            data-analytics-interaction="cta"
             className="w-fit bg-white !text-ink hover:bg-white/90"
           >
             {action}
