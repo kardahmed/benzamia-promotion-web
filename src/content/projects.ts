@@ -40,6 +40,12 @@ export const projects: Project[] = [
     location: "Chlef",
     intro:
       "148 appartements répartis sur quatre blocs, du F2 au duplex, dans un ensemble sécurisé avec commerces et stationnement.",
+    cover: {
+      src: "/projets/residence-la-cite/cover.jpg",
+      alt: "Rendu de la Résidence La Cité à Chlef : blocs résidentiels sur socle commercial, enseigne et parking en pied d’immeuble",
+      width: 1672,
+      height: 941,
+    },
     description:
       "La Résidence La Cité regroupe 148 appartements répartis sur quatre blocs, avec des configurations F2, F3, F4 et duplex. L’ensemble prévoit un parking, un centre commercial en pied d’immeuble, une sécurité permanente et des jardins privatifs pour certains logements du rez-de-chaussée.",
     facts: [
