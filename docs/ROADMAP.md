@@ -25,8 +25,8 @@
 
 ## Phase 2 — Expérience
 
-- [ ] Design system final et monogramme vectoriel
-- [ ] Homepage responsive avec médias réels
+- [~] Design system Tailwind + tokens de charte, monogramme vectoriel officiel
+- [~] Homepage responsive (visuels réels encore à intégrer via Supabase Storage)
 - [ ] Catalogue, filtres et pages projet
 - [ ] Visite virtuelle accessible
 - [ ] Guides Investir et blog

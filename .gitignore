@@ -10,3 +10,6 @@ test-results
 *.pem
 *.key
 .DS_Store
+
+# TypeScript incremental build info
+*.tsbuildinfo

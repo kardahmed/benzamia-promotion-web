@@ -1,0 +1,45 @@
+BENZAMIA PROMOTION — PACK LOGOS
+=================================
+
+svg/  (vectoriel, redimensionnable a l'infini)
+  monogramme-rouge.svg / -noir.svg / -blanc.svg
+  logotype-vertical-couleur.svg / -noir.svg / -blanc.svg
+  logotype-horizontal-couleur.svg / -noir.svg / -blanc.svg
+
+png/  (2x / 4x, haute resolution)
+  monogramme-rouge-transparent.png     fond transparent, 1344 x 4152
+  monogramme-noir-transparent.png      fond transparent
+  monogramme-blanc-transparent.png     fond transparent
+  monogramme-rouge.png                 sur fond blanc
+  monogramme-noir.png                  sur fond blanc
+  monogramme-blanc-sur-noir.png
+  monogramme-blanc-sur-rouge.png
+  logotype-vertical-couleur.png        sur fond blanc
+  logotype-vertical-noir.png
+  logotype-vertical-blanc-sur-noir.png
+  logotype-vertical-blanc-sur-rouge.png
+  logotype-horizontal-couleur.png
+  logotype-horizontal-noir.png
+  logotype-horizontal-blanc-sur-noir.png
+  logotype-horizontal-blanc-sur-rouge.png
+
+POLICES
+  BENZAMIA      Montserrat SemiBold 600
+  PROMOTION     Montserrat Regular 400, espacement 0.25em
+  Depuis 2013   Caveat Medium 500
+
+COULEURS
+  Rouge Benzamia  #A50000
+  Noir Beton      #0A0A0A
+  Blanc           #FFFFFF
+
+REGLES
+  - Zone de protection : largeur du monogramme (X) sur les quatre cotes.
+  - Taille minimale : logotype vertical 22 mm / 96 px ; monogramme seul 28 px.
+  - Sur fond noir ou rouge : version tout blanc obligatoire.
+  - Ne jamais deformer, incliner, recolorer, ombrer ni recomposer le nom
+    dans une autre police.
+
+NOTE SVG : les fichiers logotype contiennent du texte vivant (editable).
+Montserrat et Caveat doivent etre installees, ou vectorisez le texte
+(Illustrator : Texte > Vectoriser) avant envoi a l'imprimeur.
