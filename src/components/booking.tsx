@@ -1,5 +1,5 @@
 import { homeContent } from "@/content/home";
-import { contact } from "@/content/site";
+import { contact, routes } from "@/content/site";
 import { PrimaryButton } from "./cta";
 import { Calendar } from "./icons";
 
@@ -24,7 +24,7 @@ export function Booking() {
             </p>
           </div>
         </div>
-        <PrimaryButton href="/#contact" className="w-fit">
+        <PrimaryButton href={routes.reserver} className="w-fit">
           {action}
         </PrimaryButton>
       </div>

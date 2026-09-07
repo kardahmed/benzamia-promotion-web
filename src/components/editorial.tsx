@@ -1,4 +1,5 @@
 import { homeContent } from "@/content/home";
+import { routes } from "@/content/site";
 import { ArrowLink } from "./cta";
 
 /** Deux blocs éditoriaux côte à côte : « Investir à Chlef » et « Conseils ». */
@@ -15,7 +16,7 @@ export function Editorial() {
           <h2 className="mt-3 text-2xl sm:text-3xl">{invest.title}</h2>
           <p className="mt-3 text-graphite">{invest.description}</p>
           <div className="mt-5">
-            <ArrowLink href="/#investir">{invest.action}</ArrowLink>
+            <ArrowLink href={routes.investir}>{invest.action}</ArrowLink>
           </div>
         </article>
 
@@ -27,7 +28,7 @@ export function Editorial() {
           <h2 className="mt-3 text-2xl text-white sm:text-3xl">{news.title}</h2>
           <p className="mt-3 text-white/75">{news.description}</p>
           <div className="mt-5">
-            <ArrowLink href="/#conseils">
+            <ArrowLink href={routes.conseils}>
               <span className="text-white">{news.action}</span>
             </ArrowLink>
           </div>

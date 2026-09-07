@@ -1,4 +1,5 @@
 import { homeContent } from "@/content/home";
+import { routes } from "@/content/site";
 import { PrimaryButton } from "./cta";
 import { Monogram } from "./brand";
 
@@ -24,7 +25,7 @@ export function VirtualTour() {
           <h2 className="text-3xl leading-[1.08] text-white sm:text-4xl">{title}</h2>
           <p className="text-white/70">{description}</p>
           <PrimaryButton
-            href="/#reservation"
+            href={routes.reserver}
             className="w-fit bg-white !text-ink hover:bg-white/90"
           >
             {action}

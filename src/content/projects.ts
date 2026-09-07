@@ -1,0 +1,90 @@
+/*
+ * Catalogue des programmes — cahier des charges V2 §7.
+ * Données confirmées uniquement ; les champs « à confirmer » sont marqués
+ * `pending: true` et ne doivent pas être publiés tels quels.
+ */
+
+export type ProjectStatus = "Nouveau projet" | "En construction" | "Terminé";
+
+export type ProjectFeature = { label: string; pending?: boolean };
+
+export type Project = {
+  slug: string;
+  name: string;
+  status: ProjectStatus;
+  location: string;
+  intro: string;
+  description: string;
+  facts: { label: string; value: string }[];
+  typologies: string[];
+  features: ProjectFeature[];
+  /** Nombre de vignettes de galerie provisoires à afficher. */
+  gallery: number;
+};
+
+export const projects: Project[] = [
+  {
+    slug: "residence-la-cite",
+    name: "Résidence La Cité",
+    status: "En construction",
+    location: "Chlef",
+    intro:
+      "148 appartements répartis sur quatre blocs, du F2 au duplex, dans un ensemble sécurisé avec commerces et stationnement.",
+    description:
+      "La Résidence La Cité regroupe 148 appartements répartis sur quatre blocs, avec des configurations F2, F3, F4 et duplex. L’ensemble prévoit un parking, un centre commercial en pied d’immeuble, une sécurité permanente et des jardins privatifs pour certains logements du rez-de-chaussée.",
+    facts: [
+      { label: "Logements", value: "148 appartements" },
+      { label: "Blocs", value: "4 blocs" },
+      { label: "Typologies", value: "F2 · F3 · F4 · Duplex" },
+      { label: "Statut", value: "En construction" },
+    ],
+    typologies: ["F2", "F3", "F4", "Duplex"],
+    features: [
+      { label: "Parking" },
+      { label: "Centre commercial en pied d’immeuble" },
+      { label: "Sécurité permanente" },
+      { label: "Jardins privatifs pour certains logements du rez-de-chaussée" },
+      { label: "Chauffage central", pending: true },
+      { label: "Fibre optique", pending: true },
+      { label: "Visiophone", pending: true },
+      { label: "Double ascenseur par bloc", pending: true },
+    ],
+    gallery: 4,
+  },
+  {
+    slug: "residence-azhar-ii",
+    name: "Résidence Azhar II",
+    status: "Terminé",
+    location: "Ouled Mohamed, Chlef",
+    intro:
+      "44 appartements F4 sur deux blocs R+7 à Ouled Mohamed, pensés pour le confort et la sécurité des résidents.",
+    description:
+      "La Résidence Azhar II est composée de 44 appartements F4 répartis sur deux blocs R+7 à Ouled Mohamed. Les logements proposent différentes surfaces et disposent d’équipements pensés pour le confort et la sécurité des résidents.",
+    facts: [
+      { label: "Logements", value: "44 appartements" },
+      { label: "Blocs", value: "2 blocs R+7" },
+      { label: "Typologies", value: "F4" },
+      { label: "Statut", value: "Terminé" },
+    ],
+    typologies: ["F4"],
+    features: [
+      { label: "Blocs R+7" },
+      { label: "Différentes surfaces disponibles", pending: true },
+      { label: "Plans détaillés", pending: true },
+      { label: "Équipements de confort et de sécurité", pending: true },
+      { label: "Disponibilités et avancement", pending: true },
+    ],
+    gallery: 3,
+  },
+];
+
+export const projectFilters = [
+  "Tous",
+  "Nouveau projet",
+  "En construction",
+  "Terminé",
+] as const;
+
+export function getProject(slug: string): Project | undefined {
+  return projects.find((p) => p.slug === slug);
+}

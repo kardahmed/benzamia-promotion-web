@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat, Caveat, Fraunces } from "next/font/google";
 import "./globals.css";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://benzamiapromotion.com";
 
@@ -60,7 +62,11 @@ export default function RootLayout({
       lang="fr"
       className={`${inter.variable} ${montserrat.variable} ${caveat.variable} ${fraunces.variable}`}
     >
-      <body>{children}</body>
+      <body className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

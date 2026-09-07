@@ -135,7 +135,7 @@ export function Projects() {
       </div>
 
       <div className="mt-8">
-        <ArrowLink href="/#contact">Demander une brochure</ArrowLink>
+        <ArrowLink href="/projets">Voir tous les projets</ArrowLink>
       </div>
     </section>
   );

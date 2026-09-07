@@ -27,13 +27,15 @@
 
 - [~] Design system Tailwind + tokens de charte, monogramme vectoriel officiel
 - [~] Homepage responsive (visuels réels encore à intégrer via Supabase Storage)
-- [ ] Catalogue, filtres et pages projet
-- [ ] Visite virtuelle accessible
-- [ ] Guides Investir et blog
+- [x] Catalogue, filtres (partageables par URL) et pages projet
+- [~] Visite virtuelle accessible (page + emplacement ; panoramas à intégrer)
+- [~] Guides Investir et blog (hub + listes ; contenus rédactionnels à fournir)
+- [x] Pages BENZAMIA, Contact et pages légales (gabarits à valider juridiquement)
 - [ ] Back-office Supabase Auth
 
 ## Phase 3 — Conversion
 
+- [~] Formulaires réservation et contact (UI + validation `/api/booking`, `/api/contact` ; persistance et envoi à faire)
 - [ ] Réservation avec disponibilités réelles
 - [ ] Adaptateur IMMO PRO-X
 - [ ] Rotation transactionnelle des conseillers

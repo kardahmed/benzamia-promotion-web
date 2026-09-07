@@ -1,0 +1,209 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { projects } from "@/content/projects";
+
+type Status = "idle" | "sending" | "sent" | "error";
+
+const field =
+  "w-full rounded-lg border border-hairline bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-ink";
+const labelCls = "block text-sm font-medium text-ink";
+
+export function BookingForm({ defaultProject }: { defaultProject?: string }) {
+  const [status, setStatus] = useState<Status>("idle");
+  const [message, setMessage] = useState("");
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    setStatus("sending");
+    setMessage("");
+
+    const payload = {
+      projectSlug: data.get("projectSlug"),
+      typology: data.get("typology") || undefined,
+      preferredDate: data.get("preferredDate"),
+      preferredTime: data.get("preferredTime"),
+      firstName: data.get("firstName"),
+      lastName: data.get("lastName"),
+      phone: data.get("phone"),
+      email: data.get("email") || undefined,
+      preferredChannel: data.get("preferredChannel"),
+      note: data.get("note") || undefined,
+      marketingConsent: data.get("marketingConsent") === "on",
+      requestedAt: new Date().toISOString(),
+      source: {
+        pageUrl: typeof window !== "undefined" ? window.location.href : "",
+        referrer: typeof document !== "undefined" ? document.referrer : undefined,
+      },
+    };
+
+    try {
+      const res = await fetch("/api/booking", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+      if (res.ok && result.status === "accepted") {
+        setStatus("sent");
+        form.reset();
+      } else {
+        setStatus("error");
+        setMessage(result.reason ?? "Une erreur est survenue.");
+      }
+    } catch {
+      setStatus("error");
+      setMessage("Connexion impossible. Réessayez dans un instant.");
+    }
+  }
+
+  if (status === "sent") {
+    return (
+      <div className="rounded-2xl border border-hairline bg-ivory p-6">
+        <p className="font-medium text-ink">Demande enregistrée.</p>
+        <p className="mt-2 text-sm text-graphite">
+          Un conseiller BENZAMIA vous recontacte pour confirmer le créneau et
+          vous transmettre les informations de visite.
+        </p>
+        <button
+          type="button"
+          onClick={() => setStatus("idle")}
+          className="mt-4 text-sm font-medium text-brand"
+        >
+          Envoyer une autre demande
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="grid gap-5">
+      <div className="grid gap-1.5">
+        <label className={labelCls} htmlFor="projectSlug">
+          Projet
+        </label>
+        <select
+          id="projectSlug"
+          name="projectSlug"
+          required
+          defaultValue={defaultProject ?? ""}
+          className={field}
+        >
+          <option value="" disabled>
+            Choisir une résidence
+          </option>
+          {projects.map((p) => (
+            <option key={p.slug} value={p.slug}>
+              {p.name} — {p.location}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid gap-1.5">
+        <label className={labelCls} htmlFor="typology">
+          Typologie <span className="font-normal text-grey">(facultatif)</span>
+        </label>
+        <input id="typology" name="typology" placeholder="F3, F4, duplex…" className={field} />
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <label className={labelCls} htmlFor="preferredDate">
+            Date souhaitée
+          </label>
+          <input id="preferredDate" name="preferredDate" type="date" required className={field} />
+        </div>
+        <div className="grid gap-1.5">
+          <label className={labelCls} htmlFor="preferredTime">
+            Créneau
+          </label>
+          <select id="preferredTime" name="preferredTime" required defaultValue="" className={field}>
+            <option value="" disabled>
+              Choisir
+            </option>
+            <option>Matin (9h – 12h)</option>
+            <option>Après-midi (13h – 17h)</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <label className={labelCls} htmlFor="firstName">
+            Prénom
+          </label>
+          <input id="firstName" name="firstName" required autoComplete="given-name" className={field} />
+        </div>
+        <div className="grid gap-1.5">
+          <label className={labelCls} htmlFor="lastName">
+            Nom
+          </label>
+          <input id="lastName" name="lastName" required autoComplete="family-name" className={field} />
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <label className={labelCls} htmlFor="phone">
+            Téléphone
+          </label>
+          <input id="phone" name="phone" type="tel" required autoComplete="tel" className={field} />
+        </div>
+        <div className="grid gap-1.5">
+          <label className={labelCls} htmlFor="email">
+            Email <span className="font-normal text-grey">(facultatif)</span>
+          </label>
+          <input id="email" name="email" type="email" autoComplete="email" className={field} />
+        </div>
+      </div>
+
+      <div className="grid gap-1.5">
+        <label className={labelCls} htmlFor="preferredChannel">
+          Comment préférez-vous être recontacté ?
+        </label>
+        <select id="preferredChannel" name="preferredChannel" defaultValue="Téléphone" className={field}>
+          <option>Téléphone</option>
+          <option>WhatsApp</option>
+          <option>Email</option>
+        </select>
+      </div>
+
+      <div className="grid gap-1.5">
+        <label className={labelCls} htmlFor="note">
+          Message <span className="font-normal text-grey">(facultatif)</span>
+        </label>
+        <textarea id="note" name="note" rows={3} className={field} />
+      </div>
+
+      <label className="flex items-start gap-3 text-sm text-graphite">
+        <input type="checkbox" name="marketingConsent" required className="mt-1" />
+        <span>
+          J’accepte que BENZAMIA Promotion utilise ces informations pour traiter
+          ma demande de visite et me recontacter.
+        </span>
+      </label>
+
+      {status === "error" && (
+        <p className="rounded-lg bg-brand/10 px-3 py-2 text-sm text-brand">
+          {message}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={status === "sending"}
+        className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-medium text-white transition-colors hover:bg-brand-bright disabled:opacity-60"
+      >
+        {status === "sending" ? "Envoi…" : "Envoyer ma demande de visite"}
+      </button>
+
+      <p className="text-xs text-grey">
+        Votre demande sera transmise à l’équipe commerciale BENZAMIA via IMMO
+        PRO-X. Aucune donnée de paiement n’est demandée.
+      </p>
+    </form>
+  );
+}

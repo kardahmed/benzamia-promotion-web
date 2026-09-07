@@ -1,18 +1,19 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { routes } from "@/content/site";
 import { ArrowUpRight } from "./icons";
 
-/** Déduit une cible d'ancre à partir du libellé d'un bouton du contenu validé. */
+/** Déduit la route cible à partir du libellé d'un bouton du contenu validé. */
 export function resolveHref(label: string): string {
   const l = label.toLowerCase();
-  if (l.includes("projet") || l.includes("la cité") || l.includes("azhar")) {
-    return "/#projets";
-  }
-  if (l.includes("visite virtuelle")) return "/#visite-virtuelle";
-  if (l.includes("visite") || l.includes("créneau")) return "/#reservation";
-  if (l.includes("guide")) return "/#investir";
-  if (l.includes("actualités") || l.includes("conseils")) return "/#conseils";
-  return "/#contact";
+  if (l.includes("la cité")) return `${routes.projets}/residence-la-cite`;
+  if (l.includes("azhar")) return `${routes.projets}/residence-azhar-ii`;
+  if (l.includes("projet")) return routes.projets;
+  if (l.includes("visite virtuelle")) return routes.visiteVirtuelle;
+  if (l.includes("visite") || l.includes("créneau")) return routes.reserver;
+  if (l.includes("guide")) return routes.investir;
+  if (l.includes("actualités") || l.includes("conseils")) return routes.conseils;
+  return routes.contact;
 }
 
 const base =

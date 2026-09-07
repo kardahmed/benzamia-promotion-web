@@ -1,25 +1,34 @@
-/*
- * Navigation, coordonnées et pied de page — cahier des charges V2 §5 & §12.
- * Les href pointent pour l'instant vers les ancres de la homepage ; ils
- * basculeront vers les routes dédiées (/projets, /visite-virtuelle, …) au
- * fur et à mesure de la création des pages.
- */
+/* Navigation, coordonnées et pied de page — cahier des charges V2 §5 & §12. */
+
+export const routes = {
+  home: "/",
+  projets: "/projets",
+  visiteVirtuelle: "/visite-virtuelle",
+  reserver: "/reserver-une-visite",
+  investir: "/investir",
+  conseils: "/conseils",
+  benzamia: "/benzamia",
+  contact: "/contact",
+  mentionsLegales: "/mentions-legales",
+  confidentialite: "/politique-de-confidentialite",
+  cookies: "/politique-de-cookies",
+} as const;
 
 export const primaryNav = [
-  { label: "Projets", href: "/#projets" },
-  { label: "Visite virtuelle", href: "/#visite-virtuelle" },
-  { label: "Investir à Chlef", href: "/#investir" },
-  { label: "Conseils", href: "/#conseils" },
-  { label: "BENZAMIA", href: "/#benzamia" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Projets", href: routes.projets },
+  { label: "Visite virtuelle", href: routes.visiteVirtuelle },
+  { label: "Investir à Chlef", href: routes.investir },
+  { label: "Conseils", href: routes.conseils },
+  { label: "BENZAMIA", href: routes.benzamia },
+  { label: "Contact", href: routes.contact },
 ] as const;
 
-export const bookingCta = { label: "Réserver une visite", href: "/#reservation" };
+export const bookingCta = { label: "Réserver une visite", href: routes.reserver };
 
 export const legalNav = [
-  { label: "Mentions légales", href: "/mentions-legales" },
-  { label: "Politique de confidentialité", href: "/politique-de-confidentialite" },
-  { label: "Politique de cookies", href: "/politique-de-cookies" },
+  { label: "Mentions légales", href: routes.mentionsLegales },
+  { label: "Politique de confidentialité", href: routes.confidentialite },
+  { label: "Politique de cookies", href: routes.cookies },
 ] as const;
 
 export const contact = {
