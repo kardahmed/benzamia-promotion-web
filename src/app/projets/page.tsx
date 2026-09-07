@@ -52,6 +52,8 @@ export default async function ProjetsPage({
                 key={f}
                 href={href}
                 aria-current={isActive ? "true" : undefined}
+                data-analytics-event="filter_projects"
+                data-analytics-filter={f}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? "border-ink bg-ink text-white"

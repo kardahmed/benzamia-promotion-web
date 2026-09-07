@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { homeContent } from "@/content/home";
+import { track as sendEvent } from "@/lib/analytics";
 import { ActionButtons, ArrowLink } from "./cta";
 import { ChevronLeft, ChevronRight } from "./icons";
 import { MediaPlaceholder } from "./media-placeholder";
@@ -71,7 +72,10 @@ export function Projects() {
             key={f}
             type="button"
             aria-pressed={active === f}
-            onClick={() => setActive(f)}
+            onClick={() => {
+              setActive(f);
+              sendEvent("filter_projects", { filter: f, location: "accueil" });
+            }}
             className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
               active === f
                 ? "border-ink bg-ink text-white"

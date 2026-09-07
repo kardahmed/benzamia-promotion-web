@@ -52,7 +52,13 @@ export function ProjectCard({ project }: { project: Project }) {
           ))}
         </div>
         <div className="mt-auto flex flex-wrap gap-3 pt-2">
-          <PrimaryButton href={href}>Découvrir</PrimaryButton>
+          <PrimaryButton
+            href={href}
+            data-analytics-event="view_project"
+            data-analytics-project={project.slug}
+          >
+            Découvrir
+          </PrimaryButton>
           <SecondaryButton href={routes.reserver}>
             Réserver une visite
           </SecondaryButton>

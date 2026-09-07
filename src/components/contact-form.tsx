@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { track } from "@/lib/analytics";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -33,6 +34,8 @@ export function ContactForm() {
       const result = await res.json();
       if (res.ok && result.ok) {
         setStatus("sent");
+        track("submit_contact");
+        track("generate_lead", { lead_type: "contact" });
         form.reset();
       } else {
         setStatus("error");

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
+import { track } from "@/lib/analytics";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -18,6 +19,13 @@ const labelCls = "block text-sm font-medium text-ink";
 export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
+  const started = useRef(false);
+
+  function onFirstInteraction() {
+    if (started.current) return;
+    started.current = true;
+    track("begin_booking", { project: defaultProject });
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,6 +62,8 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
       const result = await res.json();
       if (res.ok && result.status === "accepted") {
         setStatus("sent");
+        track("submit_booking", { project: payload.projectSlug });
+        track("generate_lead", { lead_type: "visit_request", currency: "DZD", value: 0 });
         form.reset();
       } else {
         setStatus("error");
@@ -85,7 +95,11 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-5">
+    <form
+      onSubmit={onSubmit}
+      onFocusCapture={onFirstInteraction}
+      className="grid gap-5"
+    >
       <p className="rounded-lg bg-ivory px-3 py-2.5 text-xs text-graphite">
         Visites au bureau de vente : {contact.salesOffice}. Créneaux à réserver
         au moins {BOOKING_MIN_LEAD_HOURS} h à l’avance ; un conseiller confirme
@@ -139,7 +153,16 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
           <label className={labelCls} htmlFor="preferredTime">
             Créneau
           </label>
-          <select id="preferredTime" name="preferredTime" required defaultValue="" className={field}>
+          <select
+            id="preferredTime"
+            name="preferredTime"
+            required
+            defaultValue=""
+            onChange={(e) =>
+              e.target.value && track("select_slot", { slot: e.target.value })
+            }
+            className={field}
+          >
             <option value="" disabled>
               Choisir
             </option>

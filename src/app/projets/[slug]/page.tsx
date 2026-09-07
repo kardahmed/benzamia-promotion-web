@@ -5,6 +5,7 @@ import { PageIntro } from "@/components/page-intro";
 import { MediaPlaceholder } from "@/components/media-placeholder";
 import { PrimaryButton, SecondaryButton } from "@/components/cta";
 import { JsonLd } from "@/components/json-ld";
+import { ProjectView } from "@/components/analytics/project-view";
 import { getProject, projects } from "@/content/projects";
 import { routes } from "@/content/site";
 import { breadcrumbJsonLd, residenceJsonLd } from "@/lib/seo";
@@ -49,6 +50,7 @@ export default async function ProjectPage({
 
   return (
     <main className="flex-1">
+      <ProjectView slug={project.slug} name={project.name} />
       <JsonLd
         data={[
           residenceJsonLd(project),

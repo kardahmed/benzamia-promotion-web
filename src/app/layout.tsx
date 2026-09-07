@@ -4,6 +4,10 @@ import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { JsonLd } from "@/components/json-ld";
+import { TagManager, TagManagerNoScript } from "@/components/analytics/tag-manager";
+import { ClickTracking } from "@/components/analytics/click-tracking";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { ConsentBanner } from "@/components/analytics/consent-banner";
 import {
   DEFAULT_DESCRIPTION,
   DEFAULT_KEYWORDS,
@@ -77,10 +81,15 @@ export default function RootLayout({
       className={`${inter.variable} ${montserrat.variable} ${caveat.variable} ${fraunces.variable}`}
     >
       <body className="flex min-h-dvh flex-col">
+        <TagManager />
+        <TagManagerNoScript />
         <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
         <SiteHeader />
         {children}
         <SiteFooter />
+        <ClickTracking />
+        <MetaPixel />
+        <ConsentBanner />
       </body>
     </html>
   );

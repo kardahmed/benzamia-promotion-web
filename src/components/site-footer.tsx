@@ -7,6 +7,7 @@ import {
   telHref,
 } from "@/content/site";
 import { Logo } from "./brand";
+import { ConsentManageButton } from "./analytics/consent-banner";
 
 export function SiteFooter() {
   return (
@@ -71,6 +72,7 @@ export function SiteFooter() {
                 {item.label}
               </Link>
             ))}
+            <ConsentManageButton className="hover:underline" />
           </nav>
         </div>
       </div>

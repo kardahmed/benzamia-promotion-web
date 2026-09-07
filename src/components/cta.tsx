@@ -1,7 +1,11 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { routes } from "@/content/site";
 import { ArrowUpRight } from "./icons";
+
+/** Attributs `data-*` transmis au lien (utilisés par ClickTracking). */
+type DataAttrs = { [K in `data-${string}`]?: string };
+type LinkExtras = Pick<ComponentProps<typeof Link>, "target" | "rel" | "prefetch">;
 
 /** Déduit la route cible à partir du libellé d'un bouton du contenu validé. */
 export function resolveHref(label: string): string {
@@ -19,19 +23,24 @@ export function resolveHref(label: string): string {
 const base =
   "inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium transition-colors min-h-11";
 
+type ButtonProps = {
+  href: string;
+  children: ReactNode;
+  className?: string;
+} & DataAttrs &
+  LinkExtras;
+
 export function PrimaryButton({
   href,
   children,
   className = "",
-}: {
-  href: string;
-  children: ReactNode;
-  className?: string;
-}) {
+  ...rest
+}: ButtonProps) {
   return (
     <Link
       href={href}
       className={`${base} bg-brand px-6 text-white hover:bg-brand-bright ${className}`}
+      {...rest}
     >
       {children}
     </Link>
@@ -42,15 +51,13 @@ export function SecondaryButton({
   href,
   children,
   className = "",
-}: {
-  href: string;
-  children: ReactNode;
-  className?: string;
-}) {
+  ...rest
+}: ButtonProps) {
   return (
     <Link
       href={href}
       className={`${base} border border-hairline px-6 text-ink hover:border-ink ${className}`}
+      {...rest}
     >
       {children}
     </Link>
