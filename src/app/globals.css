@@ -86,3 +86,11 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/*
+  Badge flottant reCAPTCHA masqué : la mention légale équivalente est affichée
+  sous chaque formulaire (<RecaptchaNotice />), conformément aux CGU Google.
+*/
+.grecaptcha-badge {
+  visibility: hidden;
+}

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { track } from "@/lib/analytics";
+import { RecaptchaNotice, useRecaptcha } from "./recaptcha";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -12,6 +13,7 @@ const labelCls = "block text-sm font-medium text-ink";
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
+  const getRecaptchaToken = useRecaptcha();
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,6 +22,7 @@ export function ContactForm() {
     setStatus("sending");
     setMessage("");
     try {
+      const recaptchaToken = await getRecaptchaToken("contact");
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -29,6 +32,8 @@ export function ContactForm() {
           phone: data.get("phone") || undefined,
           message: data.get("message"),
           consent: data.get("consent") === "on",
+          company: data.get("company") || undefined,
+          recaptchaToken,
         }),
       });
       const result = await res.json();
@@ -93,6 +98,17 @@ export function ContactForm() {
           à ma demande.
         </span>
       </label>
+
+      {/* Piège anti-robot : invisible, ne doit jamais être rempli. */}
+      <input
+        type="text"
+        name="company"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden
+        className="absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
+
       {status === "error" && (
         <p className="rounded-lg bg-brand/10 px-3 py-2 text-sm text-brand">{message}</p>
       )}
@@ -103,6 +119,7 @@ export function ContactForm() {
       >
         {status === "sending" ? "Envoi…" : "Envoyer le message"}
       </button>
+      <RecaptchaNotice />
     </form>
   );
 }

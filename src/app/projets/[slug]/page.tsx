@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageIntro } from "@/components/page-intro";
 import { MediaPlaceholder } from "@/components/media-placeholder";
+import { LocationMap } from "@/components/location-map";
 import { PrimaryButton, SecondaryButton } from "@/components/cta";
 import { JsonLd } from "@/components/json-ld";
 import { ProjectView } from "@/components/analytics/project-view";
@@ -173,6 +174,18 @@ export default async function ProjectPage({
             </p>
           </aside>
         </div>
+
+        {project.map && (
+          <div className="mt-14">
+            <h2 className="text-2xl">Localisation</h2>
+            <LocationMap
+              map={project.map}
+              title={project.name}
+              subtitle={project.location}
+              className="mt-4 max-w-3xl"
+            />
+          </div>
+        )}
 
         <div className="mt-16 border-t border-hairline pt-8">
           <Link href={routes.projets} className="text-sm font-medium text-brand">

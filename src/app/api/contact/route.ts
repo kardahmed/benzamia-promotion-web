@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,15 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json({ ok: false, reason: "Requête invalide." }, { status: 400 });
+  }
+
+  // Anti-abus (CDC §16) : piège + reCAPTCHA v3.
+  if (typeof body.company === "string" && body.company.trim() !== "") {
+    return NextResponse.json({ ok: true }); // bot : on absorbe sans rien traiter
+  }
+  const captcha = await verifyRecaptcha(body.recaptchaToken, "contact");
+  if (!captcha.ok) {
+    return NextResponse.json({ ok: false, reason: captcha.reason }, { status: 403 });
   }
 
   const name = String(body.name ?? "").trim();

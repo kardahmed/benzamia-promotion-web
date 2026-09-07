@@ -67,7 +67,12 @@ export default function ContactPage() {
             </div>
           </dl>
 
-          <LocationMap className="mt-6" />
+          <LocationMap
+            map={contact.map}
+            title={contact.salesOffice}
+            subtitle={contact.hours}
+            className="mt-6"
+          />
 
           <div className="mt-6">
             <PrimaryButton href={routes.reserver} className="w-full">

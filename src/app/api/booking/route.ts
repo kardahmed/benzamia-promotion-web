@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS } from "@/content/site";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import type { BookingResult } from "@/contracts/booking";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,21 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { status: "rejected", reason: "Requête invalide." } satisfies BookingResult,
       { status: 400 },
+    );
+  }
+
+  // Anti-abus (CDC §16) : piège + reCAPTCHA v3.
+  if (typeof body.company === "string" && body.company.trim() !== "") {
+    return NextResponse.json({
+      status: "accepted",
+      leadId: `ignored-${Date.now()}`,
+    } satisfies BookingResult);
+  }
+  const captcha = await verifyRecaptcha(body.recaptchaToken, "booking");
+  if (!captcha.ok) {
+    return NextResponse.json(
+      { status: "rejected", reason: captcha.reason } satisfies BookingResult,
+      { status: 403 },
     );
   }
 

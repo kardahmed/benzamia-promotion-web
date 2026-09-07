@@ -118,6 +118,16 @@ export function residenceJsonLd(project: Project) {
       addressLocality: project.location,
       addressCountry: "DZ",
     },
+    ...(project.map
+      ? {
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: project.map.lat,
+            longitude: project.map.lng,
+          },
+          hasMap: project.map.link,
+        }
+      : {}),
     containedInPlace: { "@type": "City", name: "Chlef" },
     provider: { "@id": ORG_ID },
   };

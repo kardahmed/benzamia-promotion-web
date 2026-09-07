@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
 import { track } from "@/lib/analytics";
+import { RecaptchaNotice, useRecaptcha } from "./recaptcha";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -20,6 +21,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const started = useRef(false);
+  const getRecaptchaToken = useRecaptcha();
 
   function onFirstInteraction() {
     if (started.current) return;
@@ -46,6 +48,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
       preferredChannel: data.get("preferredChannel"),
       note: data.get("note") || undefined,
       marketingConsent: data.get("marketingConsent") === "on",
+      company: data.get("company") || undefined,
       requestedAt: new Date().toISOString(),
       source: {
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
@@ -54,10 +57,11 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
     };
 
     try {
+      const recaptchaToken = await getRecaptchaToken("booking");
       const res = await fetch("/api/booking", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, recaptchaToken }),
       });
       const result = await res.json();
       if (res.ok && result.status === "accepted") {
@@ -228,6 +232,16 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
         </span>
       </label>
 
+      {/* Piège anti-robot : invisible, ne doit jamais être rempli. */}
+      <input
+        type="text"
+        name="company"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden
+        className="absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
+
       {status === "error" && (
         <p className="rounded-lg bg-brand/10 px-3 py-2 text-sm text-brand">
           {message}
@@ -246,6 +260,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
         Votre demande est transmise à l’équipe commerciale BENZAMIA. Aucune
         donnée de paiement n’est demandée.
       </p>
+      <RecaptchaNotice />
     </form>
   );
 }

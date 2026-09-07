@@ -1,5 +1,15 @@
 /* Navigation, coordonnées et pied de page — cahier des charges V2 §5 & §12. */
 
+/** Fiche Google Maps d'un lieu (embed sans clé API + lien court « Itinéraire »). */
+export type MapPlace = {
+  lat: number;
+  lng: number;
+  /** Lien court maps.app.goo.gl pour « Itinéraire ». */
+  link: string;
+  /** Src de l'iframe « Partager > Intégrer une carte » (sans clé, n'expire pas). */
+  embedSrc: string;
+};
+
 export const routes = {
   home: "/",
   projets: "/projets",
@@ -41,15 +51,14 @@ export const contact = {
   salesOffice: "Résidence La Cité, Chlef",
   hours: "Samedi – jeudi, 9h – 17h",
   signature: "Bâtir haut, tenir parole.",
-  /** Fiche Google Maps « Benzamia promotion - la résidence la cité ». */
+  /** Fiche Google Maps « Benzamia promotion - la résidence la cité » (= le siège). */
   map: {
     lat: 36.1625357,
     lng: 1.3257277,
     link: "https://maps.app.goo.gl/bW4BqUv9xwQLhTFa7",
-    /** Embed « Partager > Intégrer une carte » (sans clé API, n'expire pas). */
     embedSrc:
-      "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3951.9737504853265!2d1.3249629970864905!3d36.16303999307056!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12840f0043b51e5d%3A0x4caabb4379eb68f3!2sBenzamia%20promotion%20-%20la%20r%C3%A9sidence%20la%20cit%C3%A9!5e0!3m2!1sfr!2sdz!4v1747880381750!5m2!1sfr!2sdz",
-  },
+      "https://maps.google.com/maps?q=Benzamia%20promotion%20-%20la%20r%C3%A9sidence%20la%20cit%C3%A9%2C%20Chlef&z=16&hl=fr&output=embed",
+  } satisfies MapPlace,
 } as const;
 
 /**

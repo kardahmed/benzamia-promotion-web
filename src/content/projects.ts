@@ -4,6 +4,8 @@
  * `pending: true` et ne doivent pas être publiés tels quels.
  */
 
+import type { MapPlace } from "./site";
+
 export type ProjectStatus = "Nouveau projet" | "En construction" | "Terminé";
 
 export type ProjectFeature = { label: string; pending?: boolean };
@@ -22,6 +24,8 @@ export type Project = {
   features: ProjectFeature[];
   /** Rendu de présentation, hébergé dans `public/projets/<slug>/`. */
   cover?: ProjectImage;
+  /** Fiche Google Maps de la résidence. */
+  map?: MapPlace;
   /** Une visite virtuelle 3DVista couvre ce programme (appartements témoins). */
   hasVirtualTour?: boolean;
   /** Nombre de vignettes de galerie provisoires à afficher (fallback sans photo). */
@@ -50,11 +54,18 @@ export const projects: Project[] = [
       { label: "Centre commercial en pied d’immeuble" },
       { label: "Sécurité permanente" },
       { label: "Jardins privatifs pour certains logements du rez-de-chaussée" },
-      { label: "Chauffage central", pending: true },
-      { label: "Fibre optique", pending: true },
-      { label: "Visiophone", pending: true },
-      { label: "Double ascenseur par bloc", pending: true },
+      { label: "Chauffage central" },
+      { label: "Fibre optique" },
+      { label: "Visiophone" },
+      { label: "Double ascenseur par bloc" },
     ],
+    map: {
+      lat: 36.1625357,
+      lng: 1.3257277,
+      link: "https://maps.app.goo.gl/bW4BqUv9xwQLhTFa7",
+      embedSrc:
+        "https://maps.google.com/maps?q=Benzamia%20promotion%20-%20la%20r%C3%A9sidence%20la%20cit%C3%A9%2C%20Chlef&z=16&hl=fr&output=embed",
+    },
     hasVirtualTour: true,
     gallery: 4,
   },
@@ -87,6 +98,13 @@ export const projects: Project[] = [
       { label: "Équipements de confort et de sécurité", pending: true },
       { label: "Disponibilités et avancement", pending: true },
     ],
+    map: {
+      lat: 36.168103,
+      lng: 1.3550398,
+      link: "https://maps.app.goo.gl/DkYAQEzhQxN9Cpg8A",
+      embedSrc:
+        "https://maps.google.com/maps?q=Residence%20AL-AZHAR%202%20-%20BENZAMIA%20PROMOTION%2C%20Chlef&z=16&hl=fr&output=embed",
+    },
     gallery: 3,
   },
 ];
