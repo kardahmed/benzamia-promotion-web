@@ -26,7 +26,11 @@ export function VirtualTourEmbed({
 
   return (
     <figure className="m-0">
-      <div className="relative aspect-video min-h-[420px] overflow-hidden rounded-3xl border border-hairline bg-ink lg:min-h-[600px]">
+      <div
+        className={`relative aspect-video min-h-[280px] overflow-hidden rounded-3xl border border-hairline bg-ink ${
+          started && ready ? "max-h-[80vh]" : "max-h-[460px]"
+        }`}
+      >
         {started && ready ? (
           <iframe
             src={virtualTour.url}

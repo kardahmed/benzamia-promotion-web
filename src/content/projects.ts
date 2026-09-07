@@ -64,7 +64,7 @@ export const projects: Project[] = [
       lng: 1.3257277,
       link: "https://maps.app.goo.gl/bW4BqUv9xwQLhTFa7",
       embedSrc:
-        "https://maps.google.com/maps?q=Benzamia%20promotion%20-%20la%20r%C3%A9sidence%20la%20cit%C3%A9%2C%20Chlef&z=16&hl=fr&output=embed",
+        "https://maps.google.com/maps?q=36.1625357,1.3257277&z=16&hl=fr&output=embed",
     },
     hasVirtualTour: true,
     gallery: 4,
@@ -103,7 +103,7 @@ export const projects: Project[] = [
       lng: 1.3550398,
       link: "https://maps.app.goo.gl/DkYAQEzhQxN9Cpg8A",
       embedSrc:
-        "https://maps.google.com/maps?q=Residence%20AL-AZHAR%202%20-%20BENZAMIA%20PROMOTION%2C%20Chlef&z=16&hl=fr&output=embed",
+        "https://maps.google.com/maps?q=36.168103,1.3550398&z=16&hl=fr&output=embed",
     },
     gallery: 3,
   },

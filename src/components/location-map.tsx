@@ -23,7 +23,7 @@ export function LocationMap({
       <iframe
         src={map.embedSrc}
         title={`Localisation — ${title}`}
-        className="block aspect-[4/3] w-full"
+        className="block aspect-video w-full"
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         allowFullScreen
