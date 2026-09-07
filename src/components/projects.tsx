@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import { homeContent } from "@/content/home";
+import { getProject } from "@/content/projects";
 import { track as sendEvent } from "@/lib/analytics";
 import { ActionButtons, ArrowLink } from "./cta";
 import { ChevronLeft, ChevronRight } from "./icons";
@@ -102,10 +104,20 @@ export function Projects() {
             className="group flex w-[86%] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border border-hairline bg-paper sm:w-[calc(50%-12px)]"
           >
             <div className="relative aspect-[4/3] overflow-hidden">
-              <MediaPlaceholder
-                tone={p.status === "Terminé" ? "graphite" : "ink"}
-                label={p.name}
-              />
+              {getProject(p.slug)?.cover ? (
+                <Image
+                  src={getProject(p.slug)!.cover!.src}
+                  alt={getProject(p.slug)!.cover!.alt}
+                  fill
+                  sizes="(max-width: 640px) 86vw, 45vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              ) : (
+                <MediaPlaceholder
+                  tone={p.status === "Terminé" ? "graphite" : "ink"}
+                  label={p.name}
+                />
+              )}
               <span
                 className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-medium ${statusClass(
                   p.status,

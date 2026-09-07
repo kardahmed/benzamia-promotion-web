@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/content/projects";
 import { routes } from "@/content/site";
@@ -16,10 +17,20 @@ export function ProjectCard({ project }: { project: Project }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-3xl border border-hairline bg-paper">
       <Link href={href} className="relative block aspect-[4/3] overflow-hidden">
-        <MediaPlaceholder
-          tone={project.status === "Terminé" ? "graphite" : "ink"}
-          label={project.name}
-        />
+        {project.cover ? (
+          <Image
+            src={project.cover.src}
+            alt={project.cover.alt}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <MediaPlaceholder
+            tone={project.status === "Terminé" ? "graphite" : "ink"}
+            label={project.name}
+          />
+        )}
         <span
           className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-medium ${statusClass(
             project.status,

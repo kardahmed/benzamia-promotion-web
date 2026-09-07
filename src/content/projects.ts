@@ -8,6 +8,8 @@ export type ProjectStatus = "Nouveau projet" | "En construction" | "Terminé";
 
 export type ProjectFeature = { label: string; pending?: boolean };
 
+export type ProjectImage = { src: string; alt: string; width: number; height: number };
+
 export type Project = {
   slug: string;
   name: string;
@@ -18,7 +20,9 @@ export type Project = {
   facts: { label: string; value: string }[];
   typologies: string[];
   features: ProjectFeature[];
-  /** Nombre de vignettes de galerie provisoires à afficher. */
+  /** Rendu de présentation, hébergé dans `public/projets/<slug>/`. */
+  cover?: ProjectImage;
+  /** Nombre de vignettes de galerie provisoires à afficher (fallback sans photo). */
   gallery: number;
 };
 
@@ -58,6 +62,12 @@ export const projects: Project[] = [
     location: "Ouled Mohamed, Chlef",
     intro:
       "44 appartements F4 sur deux blocs R+7 à Ouled Mohamed, pensés pour le confort et la sécurité des résidents.",
+    cover: {
+      src: "/projets/residence-azhar-ii/cover.jpg",
+      alt: "Façade de la Résidence Azhar II à Ouled Mohamed, Chlef, avec commerces en rez-de-chaussée",
+      width: 1672,
+      height: 941,
+    },
     description:
       "La Résidence Azhar II est composée de 44 appartements F4 répartis sur deux blocs R+7 à Ouled Mohamed. Les logements proposent différentes surfaces et disposent d’équipements pensés pour le confort et la sécurité des résidents.",
     facts: [

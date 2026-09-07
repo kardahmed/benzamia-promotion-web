@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageIntro } from "@/components/page-intro";
@@ -32,6 +33,18 @@ export async function generateMetadata({
       title: `${project.name} — ${project.location}`,
       description: project.intro,
       url: path,
+      ...(project.cover
+        ? {
+            images: [
+              {
+                url: project.cover.src,
+                width: project.cover.width,
+                height: project.cover.height,
+                alt: project.cover.alt,
+              },
+            ],
+          }
+        : {}),
     },
   };
 }
@@ -75,6 +88,19 @@ export default async function ProjectPage({
       </PageIntro>
 
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        {project.cover && (
+          <div className="mb-4 aspect-[16/9] overflow-hidden rounded-3xl border border-hairline">
+            <Image
+              src={project.cover.src}
+              alt={project.cover.alt}
+              width={project.cover.width}
+              height={project.cover.height}
+              priority
+              sizes="(max-width: 1280px) 100vw, 1216px"
+              className="h-full w-full object-cover"
+            />
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: project.gallery }).map((_, i) => (
             <div
