@@ -1,12 +1,17 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow: ["/admin/", "/api/"] },
-      { userAgent: ["GPTBot", "OAI-SearchBot", "ChatGPT-User"], allow: "/" },
+      // Moteurs de réponse (cahier des charges V2 §14 — SEG/GEO)
+      {
+        userAgent: ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "PerplexityBot", "Google-Extended"],
+        allow: "/",
+      },
     ],
-    sitemap: "https://benzamiapromotion.com/sitemap.xml",
-    host: "https://benzamiapromotion.com",
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   };
 }

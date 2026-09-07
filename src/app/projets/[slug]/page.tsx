@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { PageIntro } from "@/components/page-intro";
 import { MediaPlaceholder } from "@/components/media-placeholder";
 import { PrimaryButton, SecondaryButton } from "@/components/cta";
+import { JsonLd } from "@/components/json-ld";
 import { getProject, projects } from "@/content/projects";
 import { routes } from "@/content/site";
+import { breadcrumbJsonLd, residenceJsonLd } from "@/lib/seo";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -19,10 +21,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) return {};
+  const path = `/projets/${project.slug}`;
   return {
     title: `${project.name} — ${project.location}`,
     description: project.intro,
-    alternates: { canonical: `/projets/${project.slug}` },
+    alternates: { canonical: path },
+    openGraph: {
+      type: "article",
+      title: `${project.name} — ${project.location}`,
+      description: project.intro,
+      url: path,
+    },
   };
 }
 
@@ -40,6 +49,16 @@ export default async function ProjectPage({
 
   return (
     <main className="flex-1">
+      <JsonLd
+        data={[
+          residenceJsonLd(project),
+          breadcrumbJsonLd([
+            { name: "Accueil", path: "/" },
+            { name: "Projets", path: "/projets" },
+            { name: project.name, path: `/projets/${project.slug}` },
+          ]),
+        ]}
+      />
       <PageIntro
         eyebrow={`${project.status} · ${project.location}`}
         title={project.name}
