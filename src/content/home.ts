@@ -38,8 +38,6 @@ export const homeContent = {
         status: "En construction",
         location: "Chlef",
         typologies: ["F2", "F3", "F4", "Duplex"],
-        image:
-          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
         description:
           "148 appartements répartis sur quatre blocs, avec des configurations F2, F3, F4 et duplex. La résidence prévoit un parking, un centre commercial, une sécurité permanente et des jardins privatifs pour certains logements du rez-de-chaussée.",
         actions: ["Découvrir La Cité", "Réserver une visite"],
@@ -47,11 +45,9 @@ export const homeContent = {
       {
         slug: "residence-azhar-ii",
         name: "Résidence Azhar II",
-        status: "Terminé",
+        status: "En construction",
         location: "Ouled Mohamed, Chlef",
         typologies: ["F4"],
-        image:
-          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80",
         description:
           "Une résidence composée de 44 appartements F4 répartis sur deux blocs R+7 à Ouled Mohamed. Les logements proposent différentes surfaces et disposent d’équipements pensés pour le confort et la sécurité des résidents.",
         actions: ["Découvrir Azhar II", "Réserver une visite"],

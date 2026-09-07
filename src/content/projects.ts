@@ -58,7 +58,7 @@ export const projects: Project[] = [
   {
     slug: "residence-azhar-ii",
     name: "Résidence Azhar II",
-    status: "Terminé",
+    status: "En construction",
     location: "Ouled Mohamed, Chlef",
     intro:
       "44 appartements F4 sur deux blocs R+7 à Ouled Mohamed, pensés pour le confort et la sécurité des résidents.",
@@ -74,7 +74,7 @@ export const projects: Project[] = [
       { label: "Logements", value: "44 appartements" },
       { label: "Blocs", value: "2 blocs R+7" },
       { label: "Typologies", value: "F4" },
-      { label: "Statut", value: "Terminé" },
+      { label: "Statut", value: "En construction" },
     ],
     typologies: ["F4"],
     features: [

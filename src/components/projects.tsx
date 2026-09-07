@@ -12,8 +12,12 @@ import { MediaPlaceholder } from "./media-placeholder";
 type Project = (typeof homeContent.projects.items)[number];
 
 /** Le rouge n'est un signal que pour l'état « Terminé » (livré / disponible). */
+function isTermine(status: string) {
+  return status === "Terminé";
+}
+
 function statusClass(status: string) {
-  return status === "Terminé"
+  return isTermine(status)
     ? "bg-brand text-white"
     : "bg-white/15 text-white ring-1 ring-white/30";
 }
@@ -114,7 +118,7 @@ export function Projects() {
                 />
               ) : (
                 <MediaPlaceholder
-                  tone={p.status === "Terminé" ? "graphite" : "ink"}
+                  tone={isTermine(p.status) ? "graphite" : "ink"}
                   label={p.name}
                 />
               )}
