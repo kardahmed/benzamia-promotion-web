@@ -13,5 +13,7 @@ export const legacyRedirects: LegacyRedirect[] = [
   // visite virtuelle 3DVista et l'ancien site).
   { source: "/nos-projets", destination: "/projets", permanent: true },
   { source: "/nos-projets/:slug*", destination: "/projets/:slug*", permanent: true },
+  // La page « BENZAMIA » a été fusionnée dans la section #benzamia de l'accueil.
+  { source: "/benzamia", destination: "/#benzamia", permanent: true },
   // À COMPLÉTER après le crawl complet de l'ancien site + Search Console.
 ];

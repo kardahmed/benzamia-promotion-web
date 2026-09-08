@@ -1,7 +1,8 @@
 import { homeContent } from "@/content/home";
 
 export function Company() {
-  const { title, paragraphs, signature, stats } = homeContent.company;
+  const { title, paragraphs, signature, metier, engagement, stats } =
+    homeContent.company;
   return (
     <section
       id="benzamia"
@@ -23,6 +24,17 @@ export function Company() {
             ))}
           </div>
           <p className="mt-5 font-hand text-2xl text-brand">{signature}</p>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+            <div className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="text-lg">Notre métier</h3>
+              <p className="mt-2 text-sm text-graphite">{metier}</p>
+            </div>
+            <div className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="text-lg">Notre engagement</h3>
+              <p className="mt-2 text-sm text-graphite">{engagement}</p>
+            </div>
+          </div>
 
           <dl className="mt-12 grid gap-8 sm:grid-cols-3">
             {stats.map((s) => (

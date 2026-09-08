@@ -14,7 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: url(routes.reserver), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: url(routes.investir), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: url(routes.conseils), lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: url(routes.benzamia), lastModified: now, changeFrequency: "yearly", priority: 0.5 },
     { url: url(routes.contact), lastModified: now, changeFrequency: "yearly", priority: 0.6 },
   ];
 

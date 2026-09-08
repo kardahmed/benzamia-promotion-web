@@ -17,7 +17,8 @@ export const routes = {
   reserver: "/reserver-une-visite",
   investir: "/investir",
   conseils: "/conseils",
-  benzamia: "/benzamia",
+  /** Ancre vers la section « BENZAMIA » de l'accueil (plus de page dédiée). */
+  benzamia: "/#benzamia",
   contact: "/contact",
   mentionsLegales: "/mentions-legales",
   confidentialite: "/politique-de-confidentialite",

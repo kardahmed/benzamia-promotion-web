@@ -20,6 +20,10 @@ export const homeContent = {
       "Depuis 2013, BENZAMIA développe des programmes résidentiels à Chlef en accordant une attention particulière à ces usages concrets.",
     ],
     signature: "Bâtir haut, tenir parole.",
+    metier:
+      "Recherche du foncier, conception avec nos architectes, suivi de chantier et service après-livraison : chaque étape est maîtrisée en interne.",
+    engagement:
+      "Livrer des logements qui tiennent la promesse du plan de vente, avec un interlocuteur unique jusqu’après la remise des clés.",
     stats: [
       { value: "Depuis 2013", label: "au service des familles de Chlef" },
       { value: "260", label: "appartements livrés" },
