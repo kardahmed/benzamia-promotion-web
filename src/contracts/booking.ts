@@ -1,8 +1,8 @@
 export type BookingRequest = {
   projectSlug: string;
   requestedAt: string;
-  firstName: string;
-  lastName: string;
+  /** Nom complet tel que saisi (le CRM IMMO PRO-X utilise `clients.full_name`). */
+  fullName: string;
   email?: string;
   phone: string;
   preferredDate: string;

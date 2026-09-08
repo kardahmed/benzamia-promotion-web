@@ -44,8 +44,7 @@ export async function POST(request: Request) {
   }
 
   const projectSlug = String(body.projectSlug ?? "");
-  const firstName = String(body.firstName ?? "").trim();
-  const lastName = String(body.lastName ?? "").trim();
+  const fullName = String(body.fullName ?? "").trim();
   const phone = String(body.phone ?? "").trim();
   const preferredDate = String(body.preferredDate ?? "");
   const preferredTime = String(body.preferredTime ?? "");
@@ -53,8 +52,7 @@ export async function POST(request: Request) {
 
   const errors: string[] = [];
   if (!projects.some((p) => p.slug === projectSlug)) errors.push("projet");
-  if (firstName.length < 2) errors.push("prénom");
-  if (lastName.length < 2) errors.push("nom");
+  if (fullName.length < 3) errors.push("nom et prénom");
   if (!/^[0-9+\s().-]{6,}$/.test(phone)) errors.push("téléphone");
   if (!preferredTime) errors.push("créneau");
   if (!marketingConsent) errors.push("consentement");

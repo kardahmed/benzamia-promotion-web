@@ -41,8 +41,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
       typology: data.get("typology") || undefined,
       preferredDate: data.get("preferredDate"),
       preferredTime: data.get("preferredTime"),
-      firstName: data.get("firstName"),
-      lastName: data.get("lastName"),
+      fullName: data.get("fullName"),
       phone: data.get("phone"),
       email: data.get("email") || undefined,
       preferredChannel: data.get("preferredChannel"),
@@ -176,19 +175,17 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="grid gap-1.5">
-          <label className={labelCls} htmlFor="firstName">
-            Prénom
-          </label>
-          <input id="firstName" name="firstName" required autoComplete="given-name" className={field} />
-        </div>
-        <div className="grid gap-1.5">
-          <label className={labelCls} htmlFor="lastName">
-            Nom
-          </label>
-          <input id="lastName" name="lastName" required autoComplete="family-name" className={field} />
-        </div>
+      <div className="grid gap-1.5">
+        <label className={labelCls} htmlFor="fullName">
+          Nom et prénom
+        </label>
+        <input
+          id="fullName"
+          name="fullName"
+          required
+          autoComplete="name"
+          className={field}
+        />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
