@@ -1,12 +1,19 @@
 export type BookingRequest = {
   projectSlug: string;
   requestedAt: string;
+  /** Clé stable renvoyée à chaque retry — dédoublonnage. */
+  idempotencyKey?: string;
+  /** Référence de LA réservation, distincte de toute référence de contact. */
+  externalRef?: string;
   /** Nom complet tel que saisi (le CRM IMMO PRO-X utilise `clients.full_name`). */
   fullName: string;
   email?: string;
   phone: string;
   preferredDate: string;
   preferredTime: string;
+  typology?: string;
+  preferredChannel?: string;
+  note?: string;
   marketingConsent: boolean;
   source: {
     pageUrl: string;

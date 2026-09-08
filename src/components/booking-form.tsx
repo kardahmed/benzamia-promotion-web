@@ -17,10 +17,24 @@ const field =
   "w-full rounded-lg border border-hairline bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-ink";
 const labelCls = "block text-sm font-medium text-ink";
 
+/** Lit un paramètre d'URL (utm, gclid, fbclid). */
+function param(name: string): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  return new URLSearchParams(window.location.search).get(name) ?? undefined;
+}
+
+const newId = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const started = useRef(false);
+  // Stable pour toute la vie du formulaire : un renvoi (retry, double-clic)
+  // porte la même clé et ne crée pas de doublon.
+  const idempotencyKey = useRef(newId());
   const getRecaptchaToken = useRecaptcha();
 
   function onFirstInteraction() {
@@ -49,9 +63,15 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
       marketingConsent: data.get("marketingConsent") === "on",
       company: data.get("company") || undefined,
       requestedAt: new Date().toISOString(),
+      idempotencyKey: idempotencyKey.current,
       source: {
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
         referrer: typeof document !== "undefined" ? document.referrer : undefined,
+        utmSource: param("utm_source"),
+        utmMedium: param("utm_medium"),
+        utmCampaign: param("utm_campaign"),
+        gclid: param("gclid"),
+        fbclid: param("fbclid"),
       },
     };
 

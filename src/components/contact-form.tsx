@@ -34,6 +34,11 @@ export function ContactForm() {
           consent: data.get("consent") === "on",
           company: data.get("company") || undefined,
           recaptchaToken,
+          source: {
+            pageUrl: typeof window !== "undefined" ? window.location.href : "",
+            referrer:
+              typeof document !== "undefined" ? document.referrer : undefined,
+          },
         }),
       });
       const result = await res.json();

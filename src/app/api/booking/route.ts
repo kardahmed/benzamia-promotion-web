@@ -2,21 +2,24 @@ import { NextResponse } from "next/server";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS } from "@/content/site";
 import { verifyRecaptcha } from "@/lib/recaptcha";
+import { saveVisitRequest, markEmailStatus } from "@/lib/supabase/store";
+import { notifyVisitRequest, sendVisitFallback } from "@/lib/notifications";
 import type { BookingResult } from "@/contracts/booking";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Réception d'une demande de visite.
- * Règles métier validées (voir docs/CALENDRIER-IMMOPROX.md) :
+ * Réception d'une demande de visite (voir docs/CALENDRIER-IMMOPROX.md).
  * - créneau demandé au moins 24 h à l'avance ;
  * - la visite a toujours lieu au bureau de vente ;
  * - confirmation manuelle par un conseiller ; le site ne planifie rien.
- * TODO (phase 3) : idempotence + persistance Supabase durable, file d'attente
- * vers le CRM commercial, attribution des conseillers côté CRM, email SMTP
- * Hostinger, repli e-mail si le CRM est indisponible.
- * Pour l'instant : validation des champs uniquement, rien n'est persisté.
+ *
+ * Flux : validation → anti-abus → stockage durable (Supabase, idempotent) →
+ * emails (équipe + accusé client). Si le stockage échoue alors que Supabase
+ * est configuré → repli e-mail vers BOOKING_FALLBACK_EMAIL. Le branchement
+ * IMMO PRO-X (endpoint partenaire) reste à faire côté CRM.
  */
+const toStr = (v: unknown) => (v == null ? undefined : String(v).trim() || undefined);
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
   try {
@@ -76,9 +79,84 @@ export async function POST(request: Request) {
     );
   }
 
-  // Réponse provisoire — aucune donnée n'est encore persistée ni transmise.
-  return NextResponse.json({
-    status: "accepted",
-    leadId: `pending-${Date.now()}`,
-  } satisfies BookingResult);
+  const idempotencyKey = toStr(body.idempotencyKey);
+  const externalRef =
+    toStr(body.externalRef) ??
+    `site-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const visit = {
+    externalRef,
+    projectSlug,
+    fullName,
+    phone,
+    email: toStr(body.email),
+    preferredDate,
+    preferredTime,
+    typology: toStr(body.typology),
+    preferredChannel: toStr(body.preferredChannel),
+    note: toStr(body.note),
+  };
+
+  const source =
+    body.source && typeof body.source === "object"
+      ? (body.source as Record<string, unknown>)
+      : {};
+
+  const stored = await saveVisitRequest({
+    idempotencyKey,
+    ...visit,
+    marketingConsent,
+    source,
+  });
+
+  if (stored.ok) {
+    const { team } = await notifyVisitRequest(visit);
+    void markEmailStatus(
+      "visit_requests",
+      stored.id,
+      team.ok ? "sent" : team.skipped ? "skipped" : "failed",
+    );
+    return NextResponse.json({
+      status: "accepted",
+      leadId: stored.id,
+    } satisfies BookingResult);
+  }
+
+  // Supabase non configuré (MVP) : on notifie quand même l'équipe si l'e-mail
+  // est configuré, et on accepte la demande.
+  if (stored.skipped) {
+    const { team } = await notifyVisitRequest(visit);
+    if (team.ok || team.skipped) {
+      return NextResponse.json({
+        status: "accepted",
+        leadId: externalRef,
+      } satisfies BookingResult);
+    }
+    return NextResponse.json(
+      {
+        status: "retry",
+        reason:
+          "Envoi impossible pour le moment. Réessayez, ou appelez-nous directement.",
+      } satisfies BookingResult,
+      { status: 503 },
+    );
+  }
+
+  // Supabase configuré mais l'écriture a échoué → repli e-mail (CDC §9).
+  const fallback = await sendVisitFallback(visit);
+  if (fallback.ok) {
+    void notifyVisitRequest(visit);
+    return NextResponse.json({
+      status: "accepted",
+      leadId: externalRef,
+    } satisfies BookingResult);
+  }
+  return NextResponse.json(
+    {
+      status: "retry",
+      reason:
+        "Votre demande n'a pas pu être enregistrée. Réessayez dans un instant ou appelez-nous.",
+    } satisfies BookingResult,
+    { status: 503 },
+  );
 }

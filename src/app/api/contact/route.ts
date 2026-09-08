@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { verifyRecaptcha } from "@/lib/recaptcha";
+import { saveContactMessage, markEmailStatus } from "@/lib/supabase/store";
+import { notifyContactMessage } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Message du formulaire de contact.
- * TODO (phase 3) : envoi via SMTP Hostinger vers contact@benzamiapromotion.com,
- * accusé de réception à l'expéditeur, notification à l'équipe.
+ * Message du formulaire de contact — cahier des charges V2 §12.
+ * Flux : validation → anti-abus → stockage Supabase → e-mail équipe
+ * (reply-to = expéditeur) + accusé de réception. Le message est considéré
+ * « envoyé » dès qu'il est stocké OU transmis par e-mail.
  */
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
@@ -27,6 +30,7 @@ export async function POST(request: Request) {
 
   const name = String(body.name ?? "").trim();
   const email = String(body.email ?? "").trim();
+  const phone = String(body.phone ?? "").trim() || undefined;
   const messageText = String(body.message ?? "").trim();
   const consent = body.consent === true;
 
@@ -43,5 +47,52 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ ok: true });
+  const source =
+    body.source && typeof body.source === "object"
+      ? (body.source as Record<string, unknown>)
+      : {};
+
+  const stored = await saveContactMessage({
+    name,
+    email,
+    phone,
+    message: messageText,
+    consent,
+    source,
+  });
+
+  const { team } = await notifyContactMessage({ name, email, phone, message: messageText });
+
+  if (stored.ok) {
+    void markEmailStatus(
+      "contact_messages",
+      stored.id,
+      team.ok ? "sent" : team.skipped ? "skipped" : "failed",
+    );
+    return NextResponse.json({ ok: true });
+  }
+
+  // Ni stocké, ni envoyé → échec réel.
+  if (!stored.skipped && !team.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        reason:
+          "Envoi impossible pour le moment. Réessayez, ou écrivez-nous à contact@benzamiapromotion.com.",
+      },
+      { status: 503 },
+    );
+  }
+  // Supabase absent (MVP) mais e-mail parti (ou lui aussi absent) → on accepte.
+  if (team.ok || team.skipped) {
+    return NextResponse.json({ ok: true });
+  }
+  return NextResponse.json(
+    {
+      ok: false,
+      reason:
+        "Envoi impossible pour le moment. Réessayez, ou écrivez-nous à contact@benzamiapromotion.com.",
+    },
+    { status: 503 },
+  );
 }
