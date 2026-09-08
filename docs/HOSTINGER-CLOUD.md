@@ -9,7 +9,7 @@ Le projet utilise l'hébergement Cloud managé de Hostinger avec son support nat
 3. Sélectionner `kardahmed/benzamia-promotion-web`.
 4. Sélectionner la branche `main`.
 5. Utiliser le preset Next.js.
-6. Utiliser Node.js 24, conformément à `package.json`.
+6. Utiliser Node.js 22, conformément à `package.json`.
 7. Définir la commande de build sur `npm run build`.
 8. Définir la commande de démarrage sur `npm run start`.
 9. Ajouter les variables listées dans [SECRETS.md](SECRETS.md).

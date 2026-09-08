@@ -54,7 +54,7 @@ Google Analytics, Google Ads, Meta Pixel/CAPI et IMMO PRO-X restent nécessaires
 
 ## Politique de versions
 
-- Node.js 24, conformément à `package.json`.
+- Node.js 22, conformément à `package.json`.
 - Dépendances runtime épinglées.
 - Dependabot propose les mises à jour.
 - Toute mise à jour passe par une pull request et la CI avant le déploiement Hostinger.
