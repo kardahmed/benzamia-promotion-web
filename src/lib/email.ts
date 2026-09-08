@@ -1,7 +1,9 @@
 import nodemailer, { type Transporter } from "nodemailer";
 
 /**
- * SMTP Hostinger — cahier des charges V2 §12.
+ * Envoi d'e-mails transactionnels via SMTP — cahier des charges V2 §12.
+ * Provider au choix via les variables `SMTP_*` : Resend (`smtp.resend.com`,
+ * user `resend`, pass = clé API), SMTP Hostinger, ou tout autre.
  * `skipped: true` = SMTP non configuré (mode MVP) — ce n'est pas une erreur.
  * Aucune clé/mot de passe n'est jamais exposé côté client (pas de `NEXT_PUBLIC_`).
  */
@@ -19,17 +21,17 @@ export const BOOKING_FALLBACK_EMAIL =
 let cached: Transporter | null = null;
 
 function transporter(): Transporter | null {
-  const host = process.env.HOSTINGER_SMTP_HOST;
+  const host = process.env.SMTP_HOST;
   if (!host) return null;
   if (!cached) {
-    const port = Number(process.env.HOSTINGER_SMTP_PORT ?? 465);
+    const port = Number(process.env.SMTP_PORT ?? 465);
     cached = nodemailer.createTransport({
       host,
       port,
       secure: port === 465,
       auth: {
-        user: process.env.HOSTINGER_SMTP_USER,
-        pass: process.env.HOSTINGER_SMTP_PASSWORD,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
       },
     });
   }

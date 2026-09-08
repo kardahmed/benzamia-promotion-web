@@ -48,10 +48,10 @@ GitHub Environment `production`).
 ```
 NEXT_PUBLIC_SUPABASE_URL
 SUPABASE_SECRET_KEY
-HOSTINGER_SMTP_HOST
-HOSTINGER_SMTP_PORT           # 465 (SSL) par défaut
-HOSTINGER_SMTP_USER
-HOSTINGER_SMTP_PASSWORD
+SMTP_HOST
+SMTP_PORT           # 465 (SSL) par défaut
+SMTP_USER
+SMTP_PASSWORD
 EMAIL_FROM                    # "BENZAMIA Promotion <contact@benzamiapromotion.com>"
 CONTACT_RECIPIENT            # contact@benzamiapromotion.com
 BOOKING_FALLBACK_EMAIL       # = CONTACT_RECIPIENT par défaut

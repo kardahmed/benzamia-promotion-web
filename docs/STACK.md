@@ -49,7 +49,9 @@ Google Analytics, Google Ads, Meta Pixel/CAPI et IMMO PRO-X restent nécessaires
 - Cloudflare et R2
 - Vercel
 - Firebase
-- Resend et Postmark
+- Postmark
+- ~~Resend~~ — finalement retenu comme fournisseur SMTP des e-mails
+  transactionnels (via son endpoint `smtp.resend.com`, décision 2026-09-08)
 - Sentry
 
 ## Politique de versions
