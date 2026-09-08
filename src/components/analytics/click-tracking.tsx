@@ -3,10 +3,16 @@
 import { useEffect } from "react";
 import { track, type AnalyticsEvent } from "@/lib/analytics";
 
+const DOWNLOAD_EXT =
+  /\.(pdf|docx?|xlsx?|pptx?|zip|rar|7z|csv|dwg|jpe?g|png|webp|mp4|mov)($|\?)/i;
+
 /**
  * Écouteur de clics unique (délégation). Évite de convertir chaque lien en
- * composant client. Deux sources :
- *  - liens `tel:` et WhatsApp → `click_phone` / `click_whatsapp` ;
+ * composant client. Sources :
+ *  - liens `tel:` / WhatsApp / `mailto:` → `contact_channel_click` (+ alias
+ *    historiques `click_phone` / `click_whatsapp`) ;
+ *  - liens vers un fichier → `file_download` ;
+ *  - liens externes → `outbound_click` ;
  *  - tout élément portant `data-analytics-event` (+ `data-analytics-*` en
  *    paramètres), par ex. les filtres de projets ou les cartes.
  */
@@ -32,10 +38,48 @@ export function ClickTracking() {
 
       const link = target.closest<HTMLAnchorElement>("a[href]");
       const href = link?.getAttribute("href") ?? "";
+      if (!href) return;
+
       if (href.startsWith("tel:")) {
-        track("click_phone", { phone: href.replace("tel:", "") });
-      } else if (/wa\.me|api\.whatsapp\.com|whatsapp:/.test(href)) {
-        track("click_whatsapp");
+        const phone = href.replace("tel:", "");
+        track("contact_channel_click", { channel: "phone", phone });
+        track("click_phone", { phone });
+        return;
+      }
+      if (/wa\.me|api\.whatsapp\.com|whatsapp:/.test(href)) {
+        track("contact_channel_click", { channel: "whatsapp" });
+        track("click_whatsapp", {});
+        return;
+      }
+      if (href.startsWith("mailto:")) {
+        track("contact_channel_click", {
+          channel: "email",
+          email: href.replace("mailto:", "").split("?")[0],
+        });
+        return;
+      }
+
+      // Liens absolus uniquement au-delà de ce point.
+      let url: URL;
+      try {
+        url = new URL(href, window.location.href);
+      } catch {
+        return;
+      }
+      if (url.protocol !== "http:" && url.protocol !== "https:") return;
+
+      if (DOWNLOAD_EXT.test(url.pathname)) {
+        const fileName = url.pathname.split("/").pop() || url.pathname;
+        track("file_download", {
+          file_name: fileName,
+          file_extension: fileName.split(".").pop()?.toLowerCase() ?? "",
+          link_url: url.href,
+        });
+        return;
+      }
+
+      if (url.host !== window.location.host) {
+        track("outbound_click", { link_url: url.href, link_domain: url.host });
       }
     }
 

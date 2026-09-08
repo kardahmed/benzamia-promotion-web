@@ -2,6 +2,9 @@
 
 import { useState, type FormEvent } from "react";
 import { track } from "@/lib/analytics";
+import { LEAD_CURRENCY, LEAD_VALUE } from "@/lib/tracking/config";
+import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
+import { useFormFunnel } from "@/lib/tracking/use-form-funnel";
 import { RecaptchaNotice, useRecaptcha } from "./recaptcha";
 
 type Status = "idle" | "sending" | "sent" | "error";
@@ -14,6 +17,7 @@ export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const getRecaptchaToken = useRecaptcha();
+  const funnel = useFormFunnel("contact");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -21,6 +25,8 @@ export function ContactForm() {
     const data = new FormData(form);
     setStatus("sending");
     setMessage("");
+    funnel.submit();
+    const eventId = newEventId();
     try {
       const recaptchaToken = await getRecaptchaToken("contact");
       const res = await fetch("/api/contact", {
@@ -34,6 +40,7 @@ export function ContactForm() {
           consent: data.get("consent") === "on",
           company: data.get("company") || undefined,
           recaptchaToken,
+          analytics: collectLeadContext(eventId),
           source: {
             pageUrl: typeof window !== "undefined" ? window.location.href : "",
             referrer:
@@ -44,15 +51,23 @@ export function ContactForm() {
       const result = await res.json();
       if (res.ok && result.ok) {
         setStatus("sent");
-        track("submit_contact");
-        track("generate_lead", { lead_type: "contact" });
+        funnel.complete();
+        track("submit_contact", {});
+        track("generate_lead", {
+          event_id: eventId,
+          lead_type: "contact",
+          currency: LEAD_CURRENCY,
+          value: LEAD_VALUE.contact,
+        });
         form.reset();
       } else {
         setStatus("error");
+        funnel.error(result.reason ?? "erreur inconnue");
         setMessage(result.reason ?? "Une erreur est survenue.");
       }
     } catch {
       setStatus("error");
+      funnel.error("connexion impossible");
       setMessage("Connexion impossible. Réessayez dans un instant.");
     }
   }
@@ -69,7 +84,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-5">
+    <form onSubmit={onSubmit} onFocusCapture={funnel.start} className="grid gap-5">
       <div className="grid gap-1.5">
         <label className={labelCls} htmlFor="name">
           Nom

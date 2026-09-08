@@ -4,6 +4,7 @@ import { BOOKING_MIN_LEAD_HOURS } from "@/content/site";
 import { verifyRecaptcha } from "@/lib/recaptcha";
 import { saveVisitRequest, markEmailStatus } from "@/lib/supabase/store";
 import { notifyVisitRequest, sendVisitFallback } from "@/lib/notifications";
+import { sendServerLead, requestClientInfo } from "@/lib/tracking/server";
 import type { BookingResult } from "@/contracts/booking";
 
 export const dynamic = "force-dynamic";
@@ -102,6 +103,32 @@ export async function POST(request: Request) {
       ? (body.source as Record<string, unknown>)
       : {};
 
+  // Mesure côté serveur (GA4 Measurement Protocol + Meta CAPI). Inerte tant que
+  // les secrets ne sont pas configurés ; jamais bloquant.
+  const a =
+    body.analytics && typeof body.analytics === "object"
+      ? (body.analytics as Record<string, unknown>)
+      : {};
+  const { ip, userAgent } = requestClientInfo(request);
+  const fireLead = () => {
+    if (typeof a.eventId !== "string") return;
+    void sendServerLead({
+      leadType: "visit_request",
+      eventId: a.eventId,
+      clientId: typeof a.clientId === "string" ? a.clientId : undefined,
+      email: toStr(body.email),
+      phone,
+      fullName,
+      fbp: typeof a.fbp === "string" ? a.fbp : undefined,
+      fbc: typeof a.fbc === "string" ? a.fbc : undefined,
+      pageUrl: typeof a.pageUrl === "string" ? a.pageUrl : undefined,
+      userAgent,
+      ip,
+      projectSlug,
+      leadSource: toStr((source as Record<string, unknown>).utmSource) ?? "site",
+    });
+  };
+
   const stored = await saveVisitRequest({
     idempotencyKey,
     ...visit,
@@ -116,6 +143,7 @@ export async function POST(request: Request) {
       stored.id,
       team.ok ? "sent" : team.skipped ? "skipped" : "failed",
     );
+    fireLead();
     return NextResponse.json({
       status: "accepted",
       leadId: stored.id,
@@ -127,6 +155,7 @@ export async function POST(request: Request) {
   if (stored.skipped) {
     const { team } = await notifyVisitRequest(visit);
     if (team.ok || team.skipped) {
+      fireLead();
       return NextResponse.json({
         status: "accepted",
         leadId: externalRef,
@@ -146,6 +175,7 @@ export async function POST(request: Request) {
   const fallback = await sendVisitFallback(visit);
   if (fallback.ok) {
     void notifyVisitRequest(visit);
+    fireLead();
     return NextResponse.json({
       status: "accepted",
       leadId: externalRef,

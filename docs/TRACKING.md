@@ -2,6 +2,10 @@
 
 Cahier des charges V2 §13. **Léger, documenté, testé avant lancement.**
 
+> Mesure serveur (GA4 Measurement Protocol + Meta CAPI), entonnoir de
+> formulaire, valorisation des leads, cross-domain : voir
+> **`docs/TRACKING-AVANCE.md`**.
+
 ## Ce que fait le code du site
 
 | Élément | Fichier |

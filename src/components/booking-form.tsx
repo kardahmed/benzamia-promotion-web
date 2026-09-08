@@ -4,6 +4,9 @@ import { useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
 import { track } from "@/lib/analytics";
+import { LEAD_CURRENCY, LEAD_VALUE, projectItem } from "@/lib/tracking/config";
+import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
+import { useFormFunnel } from "@/lib/tracking/use-form-funnel";
 import { RecaptchaNotice, useRecaptcha } from "./recaptcha";
 
 type Status = "idle" | "sending" | "sent" | "error";
@@ -31,15 +34,14 @@ const newId = () =>
 export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
-  const started = useRef(false);
   // Stable pour toute la vie du formulaire : un renvoi (retry, double-clic)
   // porte la même clé et ne crée pas de doublon.
   const idempotencyKey = useRef(newId());
   const getRecaptchaToken = useRecaptcha();
+  const funnel = useFormFunnel("booking", { project: defaultProject });
 
   function onFirstInteraction() {
-    if (started.current) return;
-    started.current = true;
+    funnel.start();
     track("begin_booking", { project: defaultProject });
   }
 
@@ -49,8 +51,11 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
     const data = new FormData(form);
     setStatus("sending");
     setMessage("");
+    funnel.submit();
 
+    const eventId = newEventId();
     const payload = {
+      analytics: collectLeadContext(eventId),
       projectSlug: data.get("projectSlug"),
       typology: data.get("typology") || undefined,
       preferredDate: data.get("preferredDate"),
@@ -85,15 +90,27 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
       const result = await res.json();
       if (res.ok && result.status === "accepted") {
         setStatus("sent");
-        track("submit_booking", { project: payload.projectSlug });
-        track("generate_lead", { lead_type: "visit_request", currency: "DZD", value: 0 });
+        funnel.complete();
+        const slug = String(payload.projectSlug ?? "");
+        const project = projects.find((p) => p.slug === slug);
+        track("submit_booking", { project: slug });
+        track("generate_lead", {
+          event_id: eventId,
+          lead_type: "visit_request",
+          currency: LEAD_CURRENCY,
+          value: LEAD_VALUE.visit_request,
+          project: slug,
+          items: project ? [projectItem(slug, project.name)] : undefined,
+        });
         form.reset();
       } else {
         setStatus("error");
+        funnel.error(result.reason ?? "erreur inconnue");
         setMessage(result.reason ?? "Une erreur est survenue.");
       }
     } catch {
       setStatus("error");
+      funnel.error("connexion impossible");
       setMessage("Connexion impossible. Réessayez dans un instant.");
     }
   }

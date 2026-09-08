@@ -15,6 +15,14 @@ export type BookingRequest = {
   preferredChannel?: string;
   note?: string;
   marketingConsent: boolean;
+  /** Contexte de mesure serveur (dédup GA4 / Meta) — voir src/lib/tracking/ids.ts. */
+  analytics?: {
+    eventId: string;
+    clientId?: string;
+    fbp?: string;
+    fbc?: string;
+    pageUrl?: string;
+  };
   source: {
     pageUrl: string;
     referrer?: string;

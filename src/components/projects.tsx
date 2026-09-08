@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { homeContent } from "@/content/home";
 import { getProject } from "@/content/projects";
 import { track as sendEvent } from "@/lib/analytics";
+import { projectItem } from "@/lib/tracking/config";
 import { ActionButtons, ArrowLink } from "./cta";
 import { ChevronLeft, ChevronRight } from "./icons";
 import { MediaPlaceholder } from "./media-placeholder";
@@ -34,6 +35,13 @@ export function Projects() {
         : items.filter((p: Project) => p.status === active),
     [active, filters, items],
   );
+
+  useEffect(() => {
+    sendEvent("view_item_list", {
+      item_list_name: "accueil",
+      items: items.map((p: Project, i: number) => projectItem(p.slug, p.name, i)),
+    });
+  }, [items]);
 
   const scroll = (dir: 1 | -1) => {
     const el = track.current;
