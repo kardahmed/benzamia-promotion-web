@@ -21,10 +21,12 @@ export default function VisiteVirtuellePage() {
         lead="Parcourez les appartements témoins à 360°, observez les volumes et découvrez l’organisation des pièces depuis votre téléphone ou votre ordinateur. Vous pourrez ensuite choisir un créneau pour visiter le projet sur place."
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1500px] px-4 pt-14 sm:px-6 lg:px-8">
         <VirtualTourEmbed location="page_visite" />
+      </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+      <div className="mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 lg:px-8">
+        <div className="grid gap-4 sm:grid-cols-2">
           {projects.map((p) => (
             <div
               key={p.slug}
