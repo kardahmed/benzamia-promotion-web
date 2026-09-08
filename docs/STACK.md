@@ -22,6 +22,8 @@ Aucun second dépôt et aucune seconde base permanente ne doivent être créés.
 | Domaine | Technologie |
 |---|---|
 | Web | Next.js 16.3.4, React 19.2.8, TypeScript |
+| Design | Tailwind CSS 4 (PostCSS), tokens centralisés dans `src/app/globals.css` |
+| Polices | `next/font` — Inter (interface), Fraunces (accents serif éditoriaux), Montserrat (logotype), Caveat (annotations manuscrites) |
 | Données | Une base Supabase PostgreSQL |
 | Back-office | Interface Next.js protégée par Supabase Auth |
 | Médias | Supabase Storage dans le même projet |

@@ -25,20 +25,35 @@
 
 ## Phase 2 — Expérience
 
-- [ ] Design system final et monogramme vectoriel
-- [ ] Homepage responsive avec médias réels
-- [ ] Catalogue, filtres et pages projet
-- [ ] Visite virtuelle accessible
-- [ ] Guides Investir et blog
+- [~] Design system Tailwind + tokens de charte, monogramme vectoriel officiel
+- [~] Homepage responsive (visuels réels encore à intégrer via Supabase Storage)
+- [x] Catalogue, filtres (partageables par URL) et pages projet
+- [~] Visite virtuelle accessible (page + emplacement ; panoramas à intégrer)
+- [~] Guides Investir et blog (hub + listes ; contenus rédactionnels à fournir)
+- [x] Pages BENZAMIA, Contact et pages légales (gabarits à valider juridiquement)
 - [ ] Back-office Supabase Auth
 
 ## Phase 3 — Conversion
 
-- [ ] Réservation avec disponibilités réelles
-- [ ] Adaptateur IMMO PRO-X
-- [ ] Rotation transactionnelle des conseillers
+Spécification cible : [docs/CALENDRIER-IMMOPROX.md](CALENDRIER-IMMOPROX.md)
+(règles métier validées le 2026-09-07 ; endpoints de réservation et webhooks
+**non encore opérationnels côté IMMO PRO-X** — reprise après livraison de
+l'interface partenaire du CRM).
+
+- [x] Formulaires réservation et contact — UI + validation (`/api/booking` :
+  délai 24 h, visite au bureau de vente ; `/api/contact`)
+- [ ] Persistance durable Supabase des demandes (`visit_requests`) + réponse
+  « demande reçue » uniquement après stockage réussi
+- [ ] Adaptateur endpoint partenaire IMMO PRO-X (résolution client, idempotence,
+  `external_ref`)
+- [ ] Attribution des conseillers portée par le CRM (round-robin / agent
+  existant), arbitrage si indisponible
+- [ ] Webhooks CRM signés (`visit.confirmed / rescheduled / cancelled`) →
+  mise à jour + email client (responsable email = le site)
+- [ ] Repli e-mail `BOOKING_FALLBACK_EMAIL` si le CRM est indisponible + file de
+  rejeu
 - [ ] Email SMTP Hostinger
-- [ ] Déduplication, reprises et alertes
+- [ ] Déduplication (emails de secours et de confirmation), reprises et alertes
 
 ## Phase 4 — Acquisition et qualité
 

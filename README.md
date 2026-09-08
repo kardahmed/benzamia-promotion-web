@@ -36,6 +36,7 @@ Il n'y a pas de second dépôt, pas de seconde base Supabase, pas de VPS, pas de
 - [Architecture](docs/ARCHITECTURE.md)
 - [Déploiement Hostinger Cloud](docs/HOSTINGER-CLOUD.md)
 - [Contenu validé de la homepage](docs/CONTENT-HOMEPAGE.md)
+- [Calendrier & réservation de visites — intégration IMMO PRO-X](docs/CALENDRIER-IMMOPROX.md)
 - [Secrets et environnement](docs/SECRETS.md)
 - [Plan de réalisation](docs/ROADMAP.md)
 

@@ -1,13 +1,21 @@
 # Contenu validé — Homepage
 
+> **Écart validé le 2026-09-07.** Le titre hero affiché reprend la maquette
+> (« Redéfinir / l'art de vivre à Chlef »). La formulation SEO
+> « Appartements neufs à Chlef » reste portée par les métadonnées
+> (`src/app/layout.tsx`). Le reste du contenu ci-dessous est inchangé.
+
 ## Hero
 
 **Surtitre**  
 Promotion immobilière à Chlef depuis 2013
 
-**Titre principal**  
-Votre appartement neuf  
-à Chlef, en toute clarté.
+**Titre principal (affiché)**  
+Redéfinir  
+l'art de vivre à Chlef
+
+**Titre SEO (métadonnées)**  
+Votre appartement neuf à Chlef, en toute clarté.
 
 **Description**  
 Consultez l’avancement des résidences, les typologies disponibles, les surfaces, les plans et les équipements. Lorsque vous avez identifié le projet qui vous correspond, réservez directement votre visite avec l’équipe BENZAMIA.
@@ -78,7 +86,9 @@ Lancer la visite virtuelle
 Choisissez le projet, puis le créneau qui vous convient.
 
 **Description**  
-Indiquez la résidence qui vous intéresse et sélectionnez une date disponible. Votre demande sera enregistrée dans IMMO PRO-X et confiée à un conseiller disponible. Vous recevrez ensuite les informations nécessaires pour votre visite.
+Indiquez la résidence qui vous intéresse et sélectionnez une date disponible. Nous vous recontactons rapidement pour confirmer le rendez-vous et vous communiquer les informations utiles à votre visite.
+
+> Écart validé le 2026-09-07 : aucune mention d'outil interne (CRM) dans le contenu public.
 
 **Bouton**  
 Choisir un créneau

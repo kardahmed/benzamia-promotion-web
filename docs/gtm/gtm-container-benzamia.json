@@ -1,0 +1,235 @@
+{
+  "exportFormatVersion": 2,
+  "exportTime": "2026-09-07 00:00:00",
+  "containerVersion": {
+    "path": "accounts/6268931725/containers/206211565/versions/0",
+    "accountId": "6268931725",
+    "containerId": "206211565",
+    "containerVersionId": "0",
+    "container": {
+      "path": "accounts/6268931725/containers/206211565",
+      "accountId": "6268931725",
+      "containerId": "206211565",
+      "name": "benzamiapromotion.com",
+      "publicId": "GTM-K22BDCXQ",
+      "usageContext": ["WEB"],
+      "fingerprint": "0",
+      "tagManagerUrl": "https://tagmanager.google.com/#/container/accounts/6268931725/containers/206211565/workspaces"
+    },
+    "builtInVariable": [
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "type": "EVENT",
+        "name": "Event"
+      }
+    ],
+    "variable": [
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "variableId": "10",
+        "name": "DLV - project",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "project" }
+        ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "variableId": "11",
+        "name": "DLV - project_name",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "project_name" }
+        ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "variableId": "12",
+        "name": "DLV - filter",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "filter" }
+        ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "variableId": "13",
+        "name": "DLV - location",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "location" }
+        ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "variableId": "14",
+        "name": "DLV - slot",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "slot" }
+        ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "variableId": "15",
+        "name": "DLV - lead_type",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "lead_type" }
+        ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "variableId": "16",
+        "name": "DLV - phone",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "phone" }
+        ],
+        "fingerprint": "0"
+      }
+    ],
+    "trigger": [
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "triggerId": "100",
+        "name": "CE - Événements site Benzamia",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "MATCH_REGEX",
+            "parameter": [
+              { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "^(view_project|filter_projects|open_plan|download_brochure|start_virtual_tour|click_phone|click_whatsapp|begin_booking|select_slot|submit_booking|submit_contact|generate_lead)$"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "0"
+      }
+    ],
+    "tag": [
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "tagId": "20",
+        "name": "Google tag - GA4 (G-DS3H6KY8CF)",
+        "type": "googtag",
+        "parameter": [
+          { "type": "TEMPLATE", "key": "tagId", "value": "G-DS3H6KY8CF" },
+          { "type": "LIST", "key": "configSettingsTable", "list": [] }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["2147479573"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
+      },
+      {
+        "accountId": "6268931725",
+        "containerId": "206211565",
+        "tagId": "21",
+        "name": "GA4 Event - Événements site (dataLayer)",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "{{Event}}" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "project" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{DLV - project}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "project_name" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{DLV - project_name}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "filter" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{DLV - filter}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "location" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{DLV - location}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "slot" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{DLV - slot}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "lead_type" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{DLV - lead_type}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "phone" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{DLV - phone}}" }
+                ]
+              }
+            ]
+          },
+          { "type": "TEMPLATE", "key": "measurementIdOverride", "value": "G-DS3H6KY8CF" }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["100"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
+      }
+    ],
+    "fingerprint": "0"
+  }
+}
