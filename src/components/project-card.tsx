@@ -65,8 +65,10 @@ export function ProjectCard({ project }: { project: Project }) {
         <div className="mt-auto flex flex-wrap gap-3 pt-2">
           <PrimaryButton
             href={href}
-            data-analytics-event="view_project"
+            data-analytics-event="select_item"
             data-analytics-project={project.slug}
+            data-analytics-project-name={project.name}
+            data-analytics-list-name="projets"
           >
             Découvrir
           </PrimaryButton>

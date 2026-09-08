@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { virtualTour } from "@/content/site";
 import { track } from "@/lib/analytics";
 import { ArrowUpRight } from "./icons";
@@ -23,6 +23,36 @@ export function VirtualTourEmbed({
 }) {
   const [started, setStarted] = useState(false);
   const ready = virtualTour.enabled;
+
+  // Engagement : visite « réellement consultée » au-delà de 30 s + écoute des
+  // messages éventuels de 3DVista (changement de panorama). L'origine est
+  // vérifiée : seul l'hôte de la visite peut émettre.
+  useEffect(() => {
+    if (!started) return;
+    const tourOrigin = (() => {
+      try {
+        return new URL(virtualTour.url).origin;
+      } catch {
+        return "";
+      }
+    })();
+    const timer = window.setTimeout(() => {
+      track("virtual_tour_engaged", { location, engaged_seconds: 30 });
+    }, 30_000);
+    function onMessage(event: MessageEvent) {
+      if (!tourOrigin || event.origin !== tourOrigin) return;
+      const data = event.data as { type?: string; title?: string; media?: string };
+      const room = data?.title || data?.media;
+      if (data && (data.type === "panoChange" || data.type === "mediaChange") && room) {
+        track("virtual_tour_room", { location, room: String(room) });
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("message", onMessage);
+    };
+  }, [started, location]);
 
   return (
     <figure className="m-0">

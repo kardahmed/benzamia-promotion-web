@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { JsonLd } from "@/components/json-ld";
 import { TagManager, TagManagerNoScript } from "@/components/analytics/tag-manager";
 import { ClickTracking } from "@/components/analytics/click-tracking";
+import { EngagementTracking } from "@/components/analytics/engagement-tracking";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { ConsentBanner } from "@/components/analytics/consent-banner";
 import {
@@ -88,6 +89,7 @@ export default function RootLayout({
         {children}
         <SiteFooter />
         <ClickTracking />
+        <EngagementTracking />
         <MetaPixel />
         <ConsentBanner />
       </body>

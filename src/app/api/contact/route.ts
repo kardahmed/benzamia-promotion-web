@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyRecaptcha } from "@/lib/recaptcha";
 import { saveContactMessage, markEmailStatus } from "@/lib/supabase/store";
 import { notifyContactMessage } from "@/lib/notifications";
+import { sendServerLead, requestClientInfo } from "@/lib/tracking/server";
 
 export const dynamic = "force-dynamic";
 
@@ -63,12 +64,37 @@ export async function POST(request: Request) {
 
   const { team } = await notifyContactMessage({ name, email, phone, message: messageText });
 
+  // Mesure serveur (GA4 MP + Meta CAPI) — inerte sans secrets, jamais bloquant.
+  const a =
+    body.analytics && typeof body.analytics === "object"
+      ? (body.analytics as Record<string, unknown>)
+      : {};
+  const { ip, userAgent } = requestClientInfo(request);
+  const fireLead = () => {
+    if (typeof a.eventId !== "string") return;
+    void sendServerLead({
+      leadType: "contact",
+      eventId: a.eventId,
+      clientId: typeof a.clientId === "string" ? a.clientId : undefined,
+      email,
+      phone,
+      fullName: name,
+      fbp: typeof a.fbp === "string" ? a.fbp : undefined,
+      fbc: typeof a.fbc === "string" ? a.fbc : undefined,
+      pageUrl: typeof a.pageUrl === "string" ? a.pageUrl : undefined,
+      userAgent,
+      ip,
+      leadSource: "site",
+    });
+  };
+
   if (stored.ok) {
     void markEmailStatus(
       "contact_messages",
       stored.id,
       team.ok ? "sent" : team.skipped ? "skipped" : "failed",
     );
+    fireLead();
     return NextResponse.json({ ok: true });
   }
 
@@ -85,6 +111,7 @@ export async function POST(request: Request) {
   }
   // Supabase absent (MVP) mais e-mail parti (ou lui aussi absent) → on accepte.
   if (team.ok || team.skipped) {
+    fireLead();
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json(
