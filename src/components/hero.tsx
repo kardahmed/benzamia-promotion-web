@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { homeContent } from "@/content/home";
 import { PrimaryButton, SecondaryButton, resolveHref } from "./cta";
@@ -210,9 +209,21 @@ export function Hero() {
       aria-label="Résidence La Cité, du terrassement à la livraison"
     >
       <div ref={stageRef} className="hero-stage">
-        {/* Image de base : présente au premier rendu, sans JS, et sous la vidéo
-            le temps qu'elle se charge. `static` affiche le bâtiment livré. */}
-        <Image
+        {/*
+          Image de base : présente au premier rendu, sans JS, et sous la vidéo
+          le temps qu'elle se charge. `static` affiche le bâtiment livré.
+
+          Balise `img` volontaire plutôt que `next/image` : l'optimiseur servait
+          une URL `/_next/image` tandis que l'attribut `poster` de la vidéo
+          chargeait le JPEG brut — la même image était donc téléchargée DEUX
+          fois à chaque visite. Ici les deux partagent la même URL, donc le même
+          cache. Les fichiers sont déjà calibrés pour cet usage précis (138 ko
+          en paysage, 58 ko en portrait) : l'optimiseur n'avait plus grand-chose
+          à gagner, et il réclamait en prime une variante 3840 px d'une source
+          qui n'en fait que 1280.
+        */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={
             mode === "static"
               ? narrow
@@ -221,10 +232,9 @@ export function Hero() {
               : poster
           }
           alt={timelapse.alt}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
         />
 
         {mode !== null && mode !== "static" && (
