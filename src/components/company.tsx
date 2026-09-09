@@ -7,17 +7,25 @@ export function Company() {
   return (
     <section
       id="benzamia"
-      className="mx-auto max-w-7xl scroll-mt-24 px-4 py-24 sm:px-6 lg:px-8"
+      className="relative mx-auto max-w-7xl scroll-mt-24 px-4 py-24 sm:px-6 lg:px-8"
     >
-      <div className="grid gap-10 lg:grid-cols-[200px_1fr]">
-        {/* Colonne de gauche : l'étiquette, puis le monogramme qui se dessine
-            au défilement dans l'espace resté vide. */}
-        <div className="flex flex-col gap-12 lg:h-full">
+      {/* Le geste qui traverse la section et se referme en monogramme. Posé
+          sous le contenu : il ne gêne jamais la lecture. */}
+      <MonogramTrace />
+
+      <div className="relative z-10 grid gap-10 lg:grid-cols-[200px_1fr]">
+        <div className="flex flex-col gap-12">
           <div className="flex items-start gap-4">
             <span className="eyebrow mt-1">BENZAMIA</span>
             <span className="mt-2.5 hidden h-px flex-1 bg-hairline lg:block" />
           </div>
-          <MonogramTrace />
+          {/* Emplacement réservé du logo : mesuré par le tracé, qui vient s'y
+              poser exactement. Vide par lui-même. */}
+          <div
+            data-monogram-slot
+            aria-hidden
+            className="hidden aspect-[336/1038] w-[132px] lg:block"
+          />
         </div>
 
         <div className="border-l-[6px] border-brand pl-6 sm:pl-8">
