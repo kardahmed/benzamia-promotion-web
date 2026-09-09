@@ -133,8 +133,26 @@ export function Hero() {
     };
 
     video.pause();
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+
+    // La boucle ne tourne que tant que le hero est à l'écran : inutile de
+    // recalculer 60 fois par seconde quand le visiteur lit le bas de la page.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !frame) {
+          frame = requestAnimationFrame(tick);
+        } else if (!entry.isIntersecting && frame) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+        }
+      },
+      { rootMargin: "50% 0px" },
+    );
+    observer.observe(stage);
+
+    return () => {
+      observer.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [mode, stages]);
 
   const showVideo = mode === "scrub" || mode === "play";

@@ -7,25 +7,16 @@ export function Company() {
   return (
     <section
       id="benzamia"
-      className="relative mx-auto max-w-7xl scroll-mt-24 px-4 py-24 sm:px-6 lg:px-8"
+      className="mx-auto max-w-7xl scroll-mt-24 px-4 py-24 sm:px-6 lg:px-8"
     >
-      {/* Le geste qui traverse la section et se referme en monogramme. Posé
-          sous le contenu : il ne gêne jamais la lecture. */}
-      <MonogramTrace />
-
-      <div className="relative z-10 grid gap-10 lg:grid-cols-[200px_1fr]">
+      <div className="grid gap-10 lg:grid-cols-[200px_1fr]">
         <div className="flex flex-col gap-12">
           <div className="flex items-start gap-4">
             <span className="eyebrow mt-1">BENZAMIA</span>
             <span className="mt-2.5 hidden h-px flex-1 bg-hairline lg:block" />
           </div>
-          {/* Emplacement réservé du logo : mesuré par le tracé, qui vient s'y
-              poser exactement. Vide par lui-même. */}
-          <div
-            data-monogram-slot
-            aria-hidden
-            className="hidden aspect-[336/1038] w-[132px] lg:block"
-          />
+          {/* Sur grand écran, le monogramme occupe la colonne restée vide. */}
+          <MonogramTrace className="hidden w-[132px] lg:block" />
         </div>
 
         <div className="border-l-[6px] border-brand pl-6 sm:pl-8">
@@ -60,6 +51,10 @@ export function Company() {
               </div>
             ))}
           </dl>
+
+          {/* Sans colonne de gauche, le monogramme vient clore la section :
+              c'est la place d'une signature, au pied de ce qu'elle signe. */}
+          <MonogramTrace className="mt-16 w-[96px] lg:hidden" />
         </div>
       </div>
     </section>

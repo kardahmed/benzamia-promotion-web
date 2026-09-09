@@ -162,31 +162,18 @@
     superposent jamais, sinon le contour épaissirait la forme officielle —
     ce que la charte interdit (« ne jamais déformer »).
   */
-  /* Le geste occupe les 60 premiers pour cent de la course, le monogramme
-     prend le relais ensuite : un seul trait continu du haut de la section
-     jusqu'au logo. */
-  .monogram-trace .sig-line {
+  /* Le plan reste PLEIN jusqu'au bout. Un fondu croisé symétrique laisserait
+     les deux calques à mi-opacité au même instant : le rouge paraîtrait
+     délavé. Ici l'aplat se remplit sous un trait opaque, puis le trait
+     disparaît — le plan s'efface une fois le bâtiment livré. */
+  .monogram-trace .trace {
     stroke-dasharray: 1;
-    stroke-dashoffset: calc(1 - clamp(0, calc(var(--draw, 1) / 0.6), 1));
-    /* Il s'estompe une fois passé : la signature reste lisible en filigrane
-       sans jamais concurrencer le texte qu'elle traverse. */
-    opacity: clamp(0.1, calc((0.98 - var(--draw, 1)) * 6), 0.5);
-  }
-
-  /* Le plan du monogramme reste PLEIN jusqu'au bout. Un fondu croisé
-     symétrique laisserait les deux calques à mi-opacité au même instant :
-     le rouge paraîtrait délavé. Ici l'aplat se remplit sous un trait opaque,
-     puis le trait disparaît — le plan s'efface une fois le bâtiment livré. */
-  .monogram-trace .sig-trace {
-    stroke-dasharray: 1;
-    stroke-dashoffset: calc(
-      1 - clamp(0, calc((var(--draw, 1) - 0.58) / 0.32), 1)
-    );
+    stroke-dashoffset: calc(1 - var(--draw, 1));
     opacity: clamp(0, calc((0.995 - var(--draw, 1)) * 60), 1);
   }
 
-  .monogram-trace .sig-solid {
-    opacity: clamp(0, calc((var(--draw, 1) - 0.88) * 9), 1);
+  .monogram-trace .solid {
+    opacity: clamp(0, calc((var(--draw, 1) - 0.86) * 8), 1);
   }
 }
 
