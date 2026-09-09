@@ -11,6 +11,13 @@ export const homeContent = {
     title: ["Redéfinir", "l’art de vivre à Chlef"],
     description:
       "Consultez l’avancement des résidences, les typologies disponibles, les surfaces, les plans et les équipements. Lorsque vous avez identifié le projet qui vous correspond, réservez directement votre visite avec l’équipe BENZAMIA.",
+    /*
+     * Version courte, affichée sous 640 px de large. Le texte complet fait sept
+     * lignes sur un téléphone : le hero débordait alors de l'écran et rognait
+     * la barre d'étapes et la mention légale. Même promesse, resserrée.
+     */
+    descriptionShort:
+      "Avancement, typologies, surfaces et plans de chaque résidence. Réservez ensuite votre visite avec l’équipe BENZAMIA.",
     actions: ["Découvrir les projets", "Réserver une visite"],
     /*
      * Timelapse de chantier joué au défilement (voir src/components/hero.tsx).

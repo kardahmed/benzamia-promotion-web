@@ -94,19 +94,36 @@
     overflow: hidden;
   }
 
-  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* Le défilement pilote la vidéo partout où le mouvement est accepté, y
+     compris sur téléphone — piste plus courte là-bas, pour ne pas enfermer un
+     petit écran dans trois hauteurs de vide.
+
+     `svh` et non `dvh` pour la scène collante : `dvh` change quand la barre
+     d'URL du téléphone se rétracte, et le hero sauterait en plein défilement.
+     `vh` pour la piste, qui vaut la grande hauteur et ne bouge pas non plus. */
+  @media (prefers-reduced-motion: no-preference) {
     .hero-runway {
-      /* 300vh => 200vh de course utile pour parcourir les 10 s de chantier. */
-      height: 300vh;
+      height: 240vh;
       min-height: 0;
     }
 
     .hero-stage {
       position: sticky;
       top: 0;
+      height: 100svh;
+      contain: paint;
+    }
+  }
+
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .hero-runway {
+      /* 300vh => 200vh de course utile pour parcourir les 10 s de chantier. */
+      height: 300vh;
+    }
+
+    .hero-stage {
       height: 100vh;
       min-height: 620px;
-      contain: paint;
     }
   }
 
