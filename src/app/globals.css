@@ -152,6 +152,29 @@
       transform: translateY(5px);
     }
   }
+
+  /*
+    Monogramme tracé au défilement (section BENZAMIA).
+    `--draw` va de 0 à 1 ; par défaut 1, pour que le logo achevé s'affiche
+    quand même sans JavaScript ou en animations réduites.
+
+    Le trait s'efface pendant que l'aplat apparaît : les deux ne se
+    superposent jamais, sinon le contour épaissirait la forme officielle —
+    ce que la charte interdit (« ne jamais déformer »).
+  */
+  /* Le trait reste PLEIN jusqu'au bout. Un fondu croisé symétrique laisserait
+     les deux calques à mi-opacité au même instant : le rouge paraîtrait
+     délavé. Ici l'aplat se remplit sous un trait opaque, puis le trait
+     disparaît d'un coup — le plan s'efface une fois le bâtiment livré. */
+  .monogram-trace .trace {
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--draw, 1));
+    opacity: clamp(0, calc((0.995 - var(--draw, 1)) * 60), 1);
+  }
+
+  .monogram-trace .solid {
+    opacity: clamp(0, calc((var(--draw, 1) - 0.86) * 8), 1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

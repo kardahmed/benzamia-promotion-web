@@ -1,4 +1,5 @@
 import { homeContent } from "@/content/home";
+import { MonogramTrace } from "./monogram-trace";
 
 export function Company() {
   const { title, paragraphs, signature, metier, engagement, stats } =
@@ -9,9 +10,14 @@ export function Company() {
       className="mx-auto max-w-7xl scroll-mt-24 px-4 py-24 sm:px-6 lg:px-8"
     >
       <div className="grid gap-10 lg:grid-cols-[200px_1fr]">
-        <div className="flex items-start gap-4">
-          <span className="eyebrow mt-1">BENZAMIA</span>
-          <span className="mt-2.5 hidden h-px flex-1 bg-hairline lg:block" />
+        {/* Colonne de gauche : l'étiquette, puis le monogramme qui se dessine
+            au défilement dans l'espace resté vide. */}
+        <div className="flex flex-col gap-12 lg:h-full">
+          <div className="flex items-start gap-4">
+            <span className="eyebrow mt-1">BENZAMIA</span>
+            <span className="mt-2.5 hidden h-px flex-1 bg-hairline lg:block" />
+          </div>
+          <MonogramTrace />
         </div>
 
         <div className="border-l-[6px] border-brand pl-6 sm:pl-8">
