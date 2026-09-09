@@ -127,6 +127,31 @@
     transform: scaleX(var(--hero-progress, 0));
     transform-origin: left center;
   }
+
+  /*
+    Invitation à défiler. Sans elle, un visiteur qui lit le titre et clique
+    ne découvre jamais que le chantier avance : l'effet resterait invisible.
+    Elle s'efface dès les premiers 5 % de la piste — même variable CSS, donc
+    toujours aucun rendu React.
+  */
+  .hero-scroll-cue {
+    opacity: clamp(0, calc(1 - var(--hero-progress, 0) * 20), 1);
+    transition: opacity 150ms linear;
+  }
+
+  .hero-scroll-cue svg {
+    animation: hero-nudge 2.4s ease-in-out infinite;
+  }
+
+  @keyframes hero-nudge {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

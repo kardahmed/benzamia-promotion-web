@@ -219,6 +219,26 @@ export function Hero() {
                 {actions[1]}
               </SecondaryButton>
             </div>
+
+            {/* Sans cette invitation, un visiteur qui lit le titre puis clique
+                ne découvre jamais que le chantier avance au défilement. */}
+            {scrubbing && (
+              <p className="hero-scroll-cue mt-10 flex items-center gap-2.5 text-sm text-white/70">
+                <svg
+                  aria-hidden
+                  viewBox="0 0 16 20"
+                  className="h-5 w-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M8 3v13M3.5 11.5 8 16.5l4.5-5" />
+                </svg>
+                Faites défiler : le chantier avance
+              </p>
+            )}
           </div>
 
           <div className="mx-auto w-full max-w-7xl px-4 pb-7 sm:px-6 lg:px-8">
