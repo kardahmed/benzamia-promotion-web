@@ -56,10 +56,10 @@ export async function POST(request: Request) {
 
   const errors: string[] = [];
   if (!projects.some((p) => p.slug === projectSlug)) errors.push("projet");
-  if (fullName.length < 3) errors.push("nom et prénom");
-  if (!/^[0-9+\s().-]{6,}$/.test(phone)) errors.push("téléphone");
+  if (fullName.length < 3) errors.push("nom et prénom (3 caractères minimum)");
+  if (!/^[0-9+\s().-]{6,}$/.test(phone)) errors.push("numéro de téléphone invalide");
   if (!preferredTime) errors.push("créneau");
-  if (!marketingConsent) errors.push("consentement");
+  if (!marketingConsent) errors.push("case de consentement à cocher");
 
   // Le créneau doit être demandé au moins 24 h à l'avance (premier créneau 9h).
   const slotStart = new Date(`${preferredDate}T09:00:00`);

@@ -89,7 +89,7 @@ export function ContactForm() {
         <label className={labelCls} htmlFor="name">
           Nom
         </label>
-        <input id="name" name="name" required autoComplete="name" className={field} />
+        <input id="name" name="name" required minLength={2} autoComplete="name" className={field} />
       </div>
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="grid gap-1.5">
@@ -106,10 +106,21 @@ export function ContactForm() {
         </div>
       </div>
       <div className="grid gap-1.5">
+        {/* La règle est annoncée ici et appliquée par le navigateur avant
+            l'envoi : sans cela, un message trop court n'était refusé qu'après
+            coup, avec un « Champs à corriger : message » qui n'expliquait rien. */}
         <label className={labelCls} htmlFor="message">
-          Votre message
+          Votre message{" "}
+          <span className="font-normal text-grey">(10 caractères minimum)</span>
         </label>
-        <textarea id="message" name="message" rows={5} required className={field} />
+        <textarea
+          id="message"
+          name="message"
+          rows={5}
+          required
+          minLength={10}
+          className={field}
+        />
       </div>
       <label className="flex items-start gap-3 text-sm text-graphite">
         <input type="checkbox" name="consent" required className="mt-1" />
