@@ -96,8 +96,7 @@ export function Hero() {
     if (mode !== "scrub" || degraded) return;
     const runway = runwayRef.current;
     const stage = stageRef.current;
-    const video = videoRef.current;
-    if (!runway || !stage || !video) return;
+    if (!runway || !stage) return;
 
     // Sans course, rien à piloter : la vidéo resterait figée sur sa première
     // image, un terrain vague. Mieux vaut alors la jouer simplement.
@@ -107,31 +106,55 @@ export function Hero() {
     }
 
     /*
-     * Amorçage. Plusieurs navigateurs mobiles — Safari iOS en tête — ne
-     * décodent aucune image tant que la lecture n'a pas démarré au moins une
-     * fois : la vidéo resterait figée sur sa première image pendant tout le
-     * défilement. On lance donc une lecture aussitôt suivie d'une pause ; la
-     * vidéo est muette et `playsInline`, donc la lecture automatique est
-     * autorisée.
+     * La vidéo est RELUE À CHAQUE IMAGE, jamais capturée au démarrage. Elle
+     * change d'élément quand la largeur franchit 768 px (montage portrait ↔
+     * paysage) — un téléphone qu'on tourne suffit. Une référence capturée
+     * pilotait alors une vidéo retirée de la page : la barre d'étapes
+     * avançait, la vidéo à l'écran restait figée sur le terrain vague.
+     * Constaté en production le 11/09.
      */
-    const primed = video.play();
-    if (primed) primed.then(() => video.pause()).catch(() => video.pause());
-    else video.pause();
+    let bound: HTMLVideoElement | null = null;
+    /** Dernière position demandée : on compare à elle, pas à `currentTime`,
+     *  que certains navigateurs arrondissent à l'image la plus proche — ce
+     *  qui relancerait une recherche à chaque image. */
+    let requested = -1;
 
     /*
-     * Chien de garde. Si malgré l'amorçage la lecture ne se déplace jamais
-     * alors que le visiteur a bel et bien défilé, on replie tout : mieux vaut
-     * une vidéo qui se joue simplement qu'un hero figé sur deux écrans de vide.
+     * Chien de garde. Si la lecture ne se déplace jamais alors que le visiteur
+     * a bel et bien défilé, on replie tout : mieux vaut une vidéo qui se joue
+     * simplement qu'un hero figé sur deux écrans de vide.
      */
     let seekWorked = false;
     let hasScrolled = false;
     const onSeeked = () => {
       seekWorked = true;
     };
-    video.addEventListener("seeked", onSeeked);
     const watchdog = window.setTimeout(() => {
       if (!seekWorked && hasScrolled) setDegraded(true);
     }, SEEK_WATCHDOG_MS);
+
+    /** Prend en charge une vidéo nouvellement montée. */
+    const bind = (video: HTMLVideoElement) => {
+      bound?.removeEventListener("seeked", onSeeked);
+      bound = video;
+      requested = -1;
+      video.addEventListener("seeked", onSeeked);
+      /*
+       * Amorçage. Plusieurs navigateurs mobiles — Safari iOS en tête — ne
+       * décodent aucune image tant que la lecture n'a pas démarré au moins
+       * une fois : la vidéo resterait figée sur sa première image. On lance
+       * une lecture aussitôt suivie d'une pause (muette et `playsInline`,
+       * donc autorisée), puis on force un recalage : pendant ce bref instant
+       * de lecture, la position a pu glisser.
+       */
+      const settle = () => {
+        video.pause();
+        requested = -1;
+      };
+      const primed = video.play();
+      if (primed) primed.then(settle).catch(settle);
+      else settle();
+    };
 
     let frame = 0;
     let smoothed = 0;
@@ -153,13 +176,20 @@ export function Hero() {
 
       stage.style.setProperty("--hero-progress", smoothed.toFixed(4));
 
-      const duration = video.duration;
-      if (duration > 0 && video.readyState >= 2 && !video.seeking) {
+      const video = videoRef.current;
+      if (video && video !== bound) bind(video);
+      if (
+        video &&
+        video.duration > 0 &&
+        video.readyState >= 2 &&
+        !video.seeking
+      ) {
         // On s'arrête juste avant la fin : demander la toute dernière image
         // renvoie parfois un écran noir selon les navigateurs.
-        const time = smoothed * (duration - 0.05);
-        if (Math.abs(video.currentTime - time) > SEEK_EPSILON) {
+        const time = smoothed * (video.duration - 0.05);
+        if (Math.abs(time - requested) > SEEK_EPSILON) {
           video.currentTime = time;
+          requested = time;
         }
       }
 
@@ -175,8 +205,11 @@ export function Hero() {
       frame = requestAnimationFrame(tick);
     };
 
-    // La boucle ne tourne que tant que le hero est à l'écran : inutile de
-    // recalculer 60 fois par seconde quand le visiteur lit le bas de la page.
+    // La boucle démarre tout de suite : elle ne dépend pas de l'observateur
+    // pour naître, seulement pour se mettre en pause. Celui-ci l'arrête quand
+    // le hero quitte l'écran — inutile de recalculer 60 fois par seconde
+    // pendant que le visiteur lit le bas de la page — et la relance au retour.
+    frame = requestAnimationFrame(tick);
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !frame) {
@@ -192,7 +225,7 @@ export function Hero() {
 
     return () => {
       observer.disconnect();
-      video.removeEventListener("seeked", onSeeked);
+      bound?.removeEventListener("seeked", onSeeked);
       window.clearTimeout(watchdog);
       if (frame) cancelAnimationFrame(frame);
     };
