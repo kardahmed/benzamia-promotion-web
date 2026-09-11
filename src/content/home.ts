@@ -11,7 +11,31 @@ export const homeContent = {
     title: ["Redéfinir", "l’art de vivre à Chlef"],
     description:
       "Consultez l’avancement des résidences, les typologies disponibles, les surfaces, les plans et les équipements. Lorsque vous avez identifié le projet qui vous correspond, réservez directement votre visite avec l’équipe BENZAMIA.",
+    /*
+     * Version courte, affichée sous 640 px de large. Le texte complet fait sept
+     * lignes sur un téléphone : le hero débordait alors de l'écran et rognait
+     * la barre d'étapes et la mention légale. Même promesse, resserrée.
+     */
+    descriptionShort:
+      "Avancement, typologies, surfaces et plans de chaque résidence. Réservez ensuite votre visite avec l’équipe BENZAMIA.",
     actions: ["Découvrir les projets", "Réserver une visite"],
+    /*
+     * Timelapse de chantier joué au défilement (voir src/components/hero.tsx).
+     * Les étapes reprennent le processus décrit plus bas dans `company.metier`
+     * (« chaque étape est maîtrisée en interne »).
+     */
+    timelapse: {
+      alt: "Le chantier de la Résidence La Cité à Chlef, du terrassement à la livraison.",
+      /* Mention obligatoire : la séquence est une modélisation, pas un reportage. */
+      notice: "Résidence La Cité — vue d’artiste, illustration non contractuelle.",
+      stages: [
+        { at: 0, label: "Terrassement" },
+        { at: 0.18, label: "Fondations" },
+        { at: 0.4, label: "Gros œuvre" },
+        { at: 0.66, label: "Façades" },
+        { at: 0.88, label: "Livraison" },
+      ],
+    },
   },
   company: {
     title: "Des appartements conçus autour de la vie quotidienne.",

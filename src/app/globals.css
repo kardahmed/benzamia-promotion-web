@@ -73,6 +73,125 @@
     text-transform: uppercase;
     color: var(--color-brand);
   }
+
+  /*
+    Hero — timelapse de chantier piloté au défilement.
+
+    La géométrie est décidée EN CSS, pas en JavaScript : la piste de défilement
+    n'existe que là où le scrubbing est réellement possible (écran large +
+    animations acceptées). Aucun recalcul au montage, donc aucun saut de mise
+    en page, et le repli sans JS reste un hero de hauteur normale.
+  */
+  .hero-runway {
+    position: relative;
+    height: 100dvh;
+    min-height: 620px;
+  }
+
+  .hero-stage {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Le défilement pilote la vidéo partout où le mouvement est accepté, y
+     compris sur téléphone — piste plus courte là-bas, pour ne pas enfermer un
+     petit écran dans trois hauteurs de vide.
+
+     `svh` et non `dvh` pour la scène collante : `dvh` change quand la barre
+     d'URL du téléphone se rétracte, et le hero sauterait en plein défilement.
+     `vh` pour la piste, qui vaut la grande hauteur et ne bouge pas non plus. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-runway {
+      height: 240vh;
+      min-height: 0;
+    }
+
+    .hero-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      contain: paint;
+    }
+  }
+
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .hero-runway {
+      /* 300vh => 200vh de course utile pour parcourir les 10 s de chantier. */
+      height: 300vh;
+    }
+
+    .hero-stage {
+      height: 100vh;
+      min-height: 620px;
+    }
+  }
+
+  /* La vidéo n'a pas pu se charger : on replie la piste, sinon le visiteur
+     défile dans le vide. Attribut posé par le composant sur <section>. */
+  .hero-runway[data-video="failed"] {
+    height: 100dvh;
+    min-height: 620px;
+  }
+  .hero-runway[data-video="failed"] .hero-stage {
+    position: relative;
+    height: 100%;
+  }
+
+  /* Remplissage de la barre d'étapes — piloté par --hero-progress (0 → 1),
+     écrit sur le nœud par requestAnimationFrame : aucun rendu React par image. */
+  .hero-rail-fill {
+    transform: scaleX(var(--hero-progress, 0));
+    transform-origin: left center;
+  }
+
+  /*
+    Invitation à défiler. Sans elle, un visiteur qui lit le titre et clique
+    ne découvre jamais que le chantier avance : l'effet resterait invisible.
+    Elle s'efface dès les premiers 5 % de la piste — même variable CSS, donc
+    toujours aucun rendu React.
+  */
+  .hero-scroll-cue {
+    opacity: clamp(0, calc(1 - var(--hero-progress, 0) * 20), 1);
+    transition: opacity 150ms linear;
+  }
+
+  .hero-scroll-cue svg {
+    animation: hero-nudge 2.4s ease-in-out infinite;
+  }
+
+  @keyframes hero-nudge {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
+  }
+
+  /*
+    Monogramme tracé au défilement (section BENZAMIA).
+    `--draw` va de 0 à 1 ; par défaut 1, pour que le logo achevé s'affiche
+    quand même sans JavaScript ou en animations réduites.
+
+    Le trait s'efface pendant que l'aplat apparaît : les deux ne se
+    superposent jamais, sinon le contour épaissirait la forme officielle —
+    ce que la charte interdit (« ne jamais déformer »).
+  */
+  /* Le plan reste PLEIN jusqu'au bout. Un fondu croisé symétrique laisserait
+     les deux calques à mi-opacité au même instant : le rouge paraîtrait
+     délavé. Ici l'aplat se remplit sous un trait opaque, puis le trait
+     disparaît — le plan s'efface une fois le bâtiment livré. */
+  .monogram-trace .trace {
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--draw, 1));
+    opacity: clamp(0, calc((0.995 - var(--draw, 1)) * 60), 1);
+  }
+
+  .monogram-trace .solid {
+    opacity: clamp(0, calc((var(--draw, 1) - 0.86) * 8), 1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
