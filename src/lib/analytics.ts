@@ -54,12 +54,31 @@ declare global {
   }
 }
 
-/** Pousse un événement dans le dataLayer (no-op côté serveur). */
+/** Clés déjà poussées par `track()` pendant la visite. */
+const pushedKeys = new Set<string>();
+
+/**
+ * Pousse un événement dans le dataLayer (no-op côté serveur).
+ *
+ * Le modèle de données de GTM est persistant : une clé poussée reste lisible
+ * par les variables « Version 2 » lors des événements suivants, et les
+ * tableaux/objets sont fusionnés index par index au lieu d'être remplacés.
+ * Sans remise à zéro, un `scroll_depth` hériterait du `channel`/`phone` d'un
+ * clic précédent, et `items` mélangerait deux listes de programmes. On efface
+ * donc toutes les clés connues dans un message sans `event` (qui ne déclenche
+ * aucune balise), puis on pousse l'événement.
+ */
 export function track(
   event: AnalyticsEvent,
   params: Record<string, unknown> = {},
 ): void {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer ?? [];
+  if (pushedKeys.size > 0) {
+    const reset: Record<string, undefined> = {};
+    for (const key of pushedKeys) reset[key] = undefined;
+    window.dataLayer.push(reset);
+  }
+  for (const key of Object.keys(params)) pushedKeys.add(key);
   window.dataLayer.push({ event, ...params });
 }
