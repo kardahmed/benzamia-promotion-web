@@ -220,6 +220,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
           id="fullName"
           name="fullName"
           required
+          minLength={3}
           autoComplete="name"
           className={field}
         />

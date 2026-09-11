@@ -36,10 +36,10 @@ export async function POST(request: Request) {
   const consent = body.consent === true;
 
   const errors: string[] = [];
-  if (name.length < 2) errors.push("nom");
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errors.push("email");
-  if (messageText.length < 10) errors.push("message");
-  if (!consent) errors.push("consentement");
+  if (name.length < 2) errors.push("nom (2 caractères minimum)");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errors.push("adresse e-mail invalide");
+  if (messageText.length < 10) errors.push("message (10 caractères minimum)");
+  if (!consent) errors.push("case de consentement à cocher");
 
   if (errors.length > 0) {
     return NextResponse.json(
