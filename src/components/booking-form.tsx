@@ -6,6 +6,7 @@ import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
 import { track } from "@/lib/analytics";
 import { LEAD_CURRENCY, LEAD_VALUE, projectItem } from "@/lib/tracking/config";
 import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
+import { metaResidence, metaTrack } from "@/lib/tracking/meta";
 import { useFormFunnel } from "@/lib/tracking/use-form-funnel";
 import { RecaptchaNotice, useRecaptcha } from "./recaptcha";
 
@@ -102,6 +103,19 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
           project: slug,
           items: project ? [projectItem(slug, project.name)] : undefined,
         });
+        const residence = project ? metaResidence(slug, project.name) : {};
+        metaTrack(
+          "Lead",
+          {
+            ...residence,
+            content_name: "visit_request",
+            currency: LEAD_CURRENCY,
+            value: LEAD_VALUE.visit_request,
+          },
+          eventId,
+        );
+        // Prise de rendez-vous : pas d'équivalent serveur, identifiant dédié.
+        metaTrack("Schedule", residence, `${eventId}-schedule`);
         form.reset();
       } else {
         setStatus("error");

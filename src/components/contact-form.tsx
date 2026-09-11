@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { track } from "@/lib/analytics";
 import { LEAD_CURRENCY, LEAD_VALUE } from "@/lib/tracking/config";
 import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
+import { metaTrack } from "@/lib/tracking/meta";
 import { useFormFunnel } from "@/lib/tracking/use-form-funnel";
 import { RecaptchaNotice, useRecaptcha } from "./recaptcha";
 
@@ -59,6 +60,16 @@ export function ContactForm() {
           currency: LEAD_CURRENCY,
           value: LEAD_VALUE.contact,
         });
+        // Même eventId que l'envoi serveur (CAPI) : Meta dédoublonne.
+        metaTrack(
+          "Lead",
+          {
+            content_name: "contact",
+            currency: LEAD_CURRENCY,
+            value: LEAD_VALUE.contact,
+          },
+          eventId,
+        );
         form.reset();
       } else {
         setStatus("error");

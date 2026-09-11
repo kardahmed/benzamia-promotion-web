@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { track, type AnalyticsEvent } from "@/lib/analytics";
+import { metaTrack } from "@/lib/tracking/meta";
 
 const DOWNLOAD_EXT =
   /\.(pdf|docx?|xlsx?|pptx?|zip|rar|7z|csv|dwg|jpe?g|png|webp|mp4|mov)($|\?)/i;
@@ -33,6 +34,9 @@ export function ClickTracking() {
           }
         }
         track(name, params);
+        if (name === "filter_projects" && params.filter) {
+          metaTrack("Search", { search_string: params.filter });
+        }
         return;
       }
 
@@ -44,11 +48,13 @@ export function ClickTracking() {
         const phone = href.replace("tel:", "");
         track("contact_channel_click", { channel: "phone", phone });
         track("click_phone", { phone });
+        metaTrack("Contact", { content_name: "phone" });
         return;
       }
       if (/wa\.me|api\.whatsapp\.com|whatsapp:/.test(href)) {
         track("contact_channel_click", { channel: "whatsapp" });
         track("click_whatsapp", {});
+        metaTrack("Contact", { content_name: "whatsapp" });
         return;
       }
       if (href.startsWith("mailto:")) {
@@ -56,6 +62,7 @@ export function ClickTracking() {
           channel: "email",
           email: href.replace("mailto:", "").split("?")[0],
         });
+        metaTrack("Contact", { content_name: "email" });
         return;
       }
 

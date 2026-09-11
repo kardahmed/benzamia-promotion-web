@@ -86,3 +86,26 @@ test("track() remet à zéro les paramètres des événements précédents", asy
   assert.ok(window.dataLayer.filter((m) => !m.event).every((m) => Object.values(m).every((v) => v === undefined)));
   delete globalThis.window;
 });
+
+test("événements Meta : standards, dédupliqués et sans pixel = inertes", async () => {
+  // Sans pixel (consentement refusé ou ID absent), fbq n'existe pas.
+  globalThis.window = {};
+  const { metaTrack } = await import("../../src/lib/tracking/meta.ts");
+  metaTrack("Lead", { value: 1 }, "abc"); // ne doit pas jeter
+  const calls = [];
+  window.fbq = (...args) => calls.push(args);
+  metaTrack("Lead", { value: 1500 }, "evt-1");
+  metaTrack("ViewContent", { content_ids: ["x"] });
+  assert.deepEqual(calls[0], ["track", "Lead", { value: 1500 }, { eventID: "evt-1" }]);
+  assert.equal(calls[1][3], undefined, "pas d'eventID quand il n'y en a pas");
+  delete globalThis.window;
+
+  // Le lead navigateur porte le même eventId que l'envoi serveur (CAPI).
+  for (const f of ["src/components/contact-form.tsx", "src/components/booking-form.tsx"]) {
+    const src = await read(f);
+    assert.match(src, /metaTrack\(\s*"Lead",[\s\S]*?eventId,/, `${f} : dédup Meta`);
+  }
+  const click = await read("src/components/analytics/click-tracking.tsx");
+  assert.match(click, /metaTrack\("Contact"/);
+  assert.match(click, /metaTrack\("Search"/);
+});
