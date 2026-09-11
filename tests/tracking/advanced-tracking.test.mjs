@@ -53,3 +53,36 @@ test("suivi engagement : scroll, sortants, téléchargements", async () => {
   assert.match(click, /outbound_click/);
   assert.match(click, /file_download/);
 });
+
+test("track() remet à zéro les paramètres des événements précédents", async () => {
+  // Modèle de données GTM « Version 2 » : les clés persistent et les tableaux
+  // fusionnent. On rejoue le dataLayer comme GTM pour vérifier l'isolement.
+  globalThis.window = { dataLayer: [] };
+  const { track } = await import("../../src/lib/analytics.ts");
+  track("view_item_list", { items: [{ item_id: "a" }, { item_id: "b" }] });
+  track("contact_channel_click", { channel: "phone", phone: "+213" });
+  track("scroll_depth", { percent: 50 });
+  track("view_item", { items: [{ item_id: "c" }] });
+
+  const merge = (target, source) => {
+    for (const [k, v] of Object.entries(source)) {
+      if (v && typeof v === "object") {
+        target[k] = target[k] && typeof target[k] === "object" ? target[k] : Array.isArray(v) ? [] : {};
+        merge(target[k], v);
+      } else target[k] = v;
+    }
+  };
+  const model = {};
+  const seen = {};
+  for (const message of window.dataLayer) {
+    merge(model, message);
+    if (message.event) seen[message.event] = structuredClone(model);
+  }
+  assert.equal(seen.scroll_depth.channel, undefined);
+  assert.equal(seen.scroll_depth.phone, undefined);
+  assert.equal(seen.scroll_depth.percent, 50);
+  assert.deepEqual(seen.view_item.items, [{ item_id: "c" }]);
+  // Les messages de remise à zéro ne portent pas d'événement (aucune balise).
+  assert.ok(window.dataLayer.filter((m) => !m.event).every((m) => Object.values(m).every((v) => v === undefined)));
+  delete globalThis.window;
+});
