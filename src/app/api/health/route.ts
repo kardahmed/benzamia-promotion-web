@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { trackingStatus } from "@/lib/tracking/server";
+import { crmStatus } from "@/lib/crm/bookings";
 
 export const dynamic = "force-dynamic";
 
@@ -14,5 +15,6 @@ export function GET() {
     service: "benzamia-promotion-web",
     timestamp: new Date().toISOString(),
     tracking: trackingStatus(),
+    crm: crmStatus(),
   });
 }
