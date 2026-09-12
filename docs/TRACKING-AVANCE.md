@@ -127,3 +127,39 @@ puis retirer ces deux variables.
   l'essentiel du besoin « anti-adblock ».
 - **Google Ads** : pas de compte publicitaire ⇒ aucune balise de conversion Ads.
   Le code `generate_lead` est prêt si cela change.
+
+## 4. Conversions hors ligne (visites réalisées, ventes)
+
+Une valeur unique pour tous les leads n'apprend rien à Meta : ce sont les
+**écarts** entre événements qui portent l'information. Ils viennent des faits
+constatés par l'équipe commerciale, pas du site.
+
+| Événement Meta | Quand | Valeur | Origine |
+|---|---|---|---|
+| `VisiteEffectuee` | la personne est venue au bureau de vente | 135 USD | webhook CRM |
+| `Purchase` | vente signée | marge réelle | fichier mensuel (pas d'événement CRM) |
+
+### Réception des événements CRM — `POST /api/crm/events`
+
+Signature HMAC-SHA256 sur `v1\n<integration_id>\n<event_id>\n<key_id>\n<timestamp>\n`
++ corps brut, fenêtre 300 s, en-têtes `x-immoprox-*`.
+
+Trois protections, dans cet ordre d'importance :
+1. **déduplication** par `(integration_id, event_id)` en base (`crm_events`) —
+   c'est elle qui empêche de compter deux fois une visite quand le worker
+   distant rejoue ;
+2. **signature** — prouve l'origine ;
+3. **fenêtre temporelle** — réduit la surface de rejeu.
+
+Réponses : `200` dès que l'événement est accepté ou déjà connu (sinon le worker
+rejoue sans fin), `401`/`400` sur signature invalide, `503` uniquement si
+l'intégration n'est pas configurée ou la base indisponible — là le rejeu est
+légitime.
+
+**Aucune donnée personnelle ne transite par le CRM** : le webhook ne porte
+qu'une référence de demande et un statut. Téléphone et e-mail sont relus dans
+`visit_requests`, hachés en SHA-256, puis envoyés à Meta avec
+`action_source: "physical_store"`.
+
+Variables : `IMMOPROX_INTEGRATION_ID`, `IMMOPROX_WEBHOOK_KEY_ID`,
+`IMMOPROX_WEBHOOK_SECRET` (+ les variantes `_NEXT` pour la rotation).
