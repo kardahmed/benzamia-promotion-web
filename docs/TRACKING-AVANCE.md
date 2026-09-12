@@ -53,7 +53,7 @@ Tunnel mesuré en septembre 2026 : **1 200 leads → 150 visites réalisées →
 |---|---|---|---|
 | `visit_request` | 16,67 | 20 000 / 1 200 | site (formulaire) |
 | `contact` | 16,67 | idem — même vivier, pas de taux distinct mesuré | site (formulaire) |
-| visite **réalisée** | 133,33 | 20 000 / 150 | hors ligne (CRM / fichier) |
+| visite **réalisée** | 135 | valeur retenue par l'équipe (20 000 / 150 ≈ 133) | hors ligne (CRM / fichier) |
 | vente | 20 000 | marge, pas le prix de vente | hors ligne (CRM / fichier) |
 
 Ce n'est pas de l'argent encaissé : c'est la contribution moyenne attendue à

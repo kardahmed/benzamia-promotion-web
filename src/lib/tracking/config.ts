@@ -44,8 +44,8 @@ export const LEAD_VALUE: Record<LeadType, number> = {
  * elles supposent un fait constaté par l'équipe commerciale.
  */
 export const OFFLINE_VALUE = {
-  /** Visite effectivement réalisée au bureau de vente (20 000 / 150). */
-  visit_completed: 133.33,
+  /** Visite effectivement réalisée au bureau de vente (valeur donnée par l'équipe). */
+  visit_completed: 135,
   /** Marge attendue sur un appartement vendu — pas le prix de vente. */
   sale_margin: 20000,
 } as const;
