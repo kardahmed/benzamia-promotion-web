@@ -76,13 +76,24 @@ function hashName(part?: string): string | undefined {
   return v ? sha256(v) : undefined;
 }
 
+/**
+ * Dernier résultat d'envoi, exposé par /api/health : sans cela un refus de
+ * Meta (jeton invalide, champ manquant) passait totalement inaperçu — la
+ * réponse HTTP n'était même pas lue.
+ */
+export let lastLeadReport: Record<string, unknown> | null = null;
+
 async function postJson(url: string, body: unknown): Promise<void> {
-  await fetch(url, {
+  const response = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(NET_TIMEOUT_MS),
   });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`HTTP ${response.status} ${detail.slice(0, 300)}`);
+  }
 }
 
 // ── GA4 Measurement Protocol ────────────────────────────────────────────────
@@ -128,7 +139,8 @@ async function sendGa4Lead(input: ServerLeadInput): Promise<"sent" | "skipped" |
       },
     );
     return "sent";
-  } catch {
+  } catch (error) {
+    console.error("[tracking] GA4 MP échec :", String(error));
     return "error";
   }
 }
@@ -183,7 +195,9 @@ async function sendMetaLead(input: ServerLeadInput): Promise<"sent" | "skipped" 
       body,
     );
     return "sent";
-  } catch {
+  } catch (error) {
+    console.error("[tracking] Meta CAPI échec :", String(error));
+    lastLeadReport = { ...lastLeadReport, metaError: String(error) };
     return "error";
   }
 }
@@ -197,10 +211,12 @@ async function sendMetaLead(input: ServerLeadInput): Promise<"sent" | "skipped" 
 export async function sendServerLead(
   input: ServerLeadInput,
 ): Promise<{ ga4: string; meta: string }> {
+  lastLeadReport = { at: new Date().toISOString(), leadType: input.leadType };
   const [ga4, meta] = await Promise.all([
     sendGa4Lead(input).catch(() => "error"),
     sendMetaLead(input).catch(() => "error"),
   ]);
+  lastLeadReport = { ...lastLeadReport, ga4, meta };
   return { ga4, meta };
 }
 
@@ -214,4 +230,16 @@ export function requestClientInfo(request: Request): { ip?: string; userAgent?: 
     h.get("cf-connecting-ip")?.trim() ||
     undefined;
   return { ip, userAgent: h.get("user-agent") ?? undefined };
+}
+
+/**
+ * Diagnostic exposé par /api/health : présence des secrets (jamais leur
+ * valeur) et résultat du dernier envoi de lead.
+ */
+export function trackingStatus() {
+  return {
+    ga4: { measurementId: Boolean(GA4_MEASUREMENT_ID), apiSecret: Boolean(GA4_API_SECRET) },
+    meta: { pixelId: Boolean(META_PIXEL_ID), capiToken: Boolean(META_CAPI_TOKEN) },
+    lastLead: lastLeadReport,
+  };
 }
