@@ -3,6 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
+import { BOOKING_SLOTS } from "@/lib/crm/payload";
 import { track } from "@/lib/analytics";
 import { LEAD_CURRENCY, LEAD_VALUE, projectItem } from "@/lib/tracking/config";
 import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
@@ -220,8 +221,9 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             <option value="" disabled>
               Choisir
             </option>
-            <option>Matin (9h – 12h)</option>
-            <option>Après-midi (13h – 17h)</option>
+            {BOOKING_SLOTS.map((slot) => (
+              <option key={slot.label}>{slot.label}</option>
+            ))}
           </select>
         </div>
       </div>

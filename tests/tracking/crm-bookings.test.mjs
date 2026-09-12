@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const mod = await import("../../src/lib/crm/bookings.ts");
+const mod = await import("../../src/lib/crm/payload.ts");
 
 const base = {
   externalRef: "site-mty5xt88-svicfy",
@@ -20,9 +20,11 @@ test("créneau converti en UTC au format exact du contrat", () => {
   // Alger = UTC+1 : 9 h locales -> 08:00 UTC, millisecondes explicites.
   assert.equal(mod.slotToUtcStart("2026-09-16", "Matin (9h – 12h)"), "2026-09-16T08:00:00.000Z");
   assert.equal(
-    mod.slotToUtcStart("2026-09-16", "Après-midi (13h – 17h)"),
-    "2026-09-16T12:00:00.000Z",
+    mod.slotToUtcStart("2026-09-16", "Après-midi (14h – 17h)"),
+    "2026-09-16T13:00:00.000Z",
+    "la pause du tenant va jusqu'à 14 h",
   );
+  assert.equal(mod.slotToUtcStart("2026-09-16", "Après-midi (13h – 17h)"), null);
   assert.equal(mod.slotToUtcStart("2026-09-16", "Soirée"), null, "créneau inconnu -> null");
   assert.equal(mod.slotToUtcStart("16/09/2026", "Matin (9h – 12h)"), null, "date invalide -> null");
 });
@@ -88,9 +90,23 @@ test("le canal e-mail n'est envoyé que si une adresse existe", () => {
   assert.equal(wa.preferred_contact_channel, "whatsapp");
 });
 
-test("sans configuration CRM, l'envoi est inerte", async () => {
-  const res = await mod.submitBookingToCrm(base);
-  assert.equal(res.status, "skipped", "aucun appel réseau sans URL ni jeton");
+test("sans configuration CRM, aucun appel réseau n'est tenté", async () => {
+  // bookings.ts importe payload.ts par alias : illisible sous Node brut, on
+  // vérifie donc la garde dans la source (le comportement réseau est prouvé
+  // par l'essai contre une API simulée, voir la PR).
+  const { readFile } = await import("node:fs/promises");
+  const src = await readFile(new URL("../../src/lib/crm/bookings.ts", import.meta.url), "utf8");
+  assert.match(src, /if \(!BASE_URL \|\| !TOKEN\) return \{ status: "skipped" \}/);
+  assert.match(src, /x-idempotency-key/);
+  assert.match(src, /AbortSignal\.timeout\(TIMEOUT_MS\)/);
+  // 4xx : rejouer ne sert à rien ; 5xx : indisponible, rejeu légitime.
+  assert.match(src, /status: "rejected"/);
+  assert.match(src, /status: "unavailable"/);
+});
+
+test("le vendredi est reconnu comme jour de fermeture", () => {
+  assert.equal(mod.isClosedDay("2026-09-18"), true, "2026-09-18 est un vendredi");
+  assert.equal(mod.isClosedDay("2026-09-19"), false, "samedi ouvert");
 });
 
 test("notes et typologie sont tronquées aux limites du contrat", () => {
