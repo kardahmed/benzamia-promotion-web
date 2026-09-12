@@ -44,13 +44,23 @@ réseau n'impacte jamais la réponse du formulaire (fire-and-forget, timeout 2,5
 
 ### Valeur des leads (`src/lib/tracking/config.ts`)
 
-| Type | Valeur (DZD) | Sens |
-|---|---|---|
-| `visit_request` | 5 000 | demande de visite |
-| `contact` | 1 500 | message simple |
+Devise : **USD** (la publicité est achetée en dollars).
 
-Poids relatifs pour comparer les canaux, **pas un chiffre d'affaires**. À
-ajuster avec l'équipe commerciale.
+Tunnel mesuré en septembre 2026 : **1 200 leads → 150 visites réalisées →
+1 vente**, marge 20 000 USD par vente, coût publicitaire ~3 USD par lead.
+
+| Étape | Valeur (USD) | D'où elle vient | Envoyée par |
+|---|---|---|---|
+| `visit_request` | 16,67 | 20 000 / 1 200 | site (formulaire) |
+| `contact` | 16,67 | idem — même vivier, pas de taux distinct mesuré | site (formulaire) |
+| visite **réalisée** | 133,33 | 20 000 / 150 | hors ligne (CRM / fichier) |
+| vente | 20 000 | marge, pas le prix de vente | hors ligne (CRM / fichier) |
+
+Ce n'est pas de l'argent encaissé : c'est la contribution moyenne attendue à
+la marge. Les trois lignes ne s'additionnent pas, ce sont trois lectures du
+même tunnel. Le formulaire « demande de visite » vaut 16,67 et **non** 133,33 :
+la visite n'est pas encore réalisée au moment de l'envoi. À réévaluer dès
+qu'il y a plusieurs ventes.
 
 ## 2. À configurer (hors code)
 

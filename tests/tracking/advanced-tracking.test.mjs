@@ -35,7 +35,7 @@ test("les formulaires transmettent le contexte de mesure", async () => {
 
 test("valeurs de lead centralisées et cohérentes", async () => {
   const src = await read("src/lib/tracking/config.ts");
-  assert.match(src, /LEAD_CURRENCY = "DZD"/);
+  assert.match(src, /LEAD_CURRENCY = "USD"/);
   assert.match(src, /visit_request:\s*\d+/);
   assert.match(src, /contact:\s*\d+/);
 });
