@@ -65,8 +65,22 @@ export function normalizeSignature(header: string): string {
   return (prefixed ? value.slice(3) : value).toLowerCase();
 }
 
+/**
+ * IMMO PRO-X distribue le secret en hexadécimal : il faut signer avec les
+ * octets qu'il représente, pas avec la chaîne elle-même. Utiliser la chaîne
+ * donnerait une signature valide en apparence mais différente de la leur, donc
+ * un 401 sur chaque événement.
+ *
+ * Un secret qui n'est pas de l'hexadécimal est utilisé tel quel : ça évite de
+ * dépendre du format d'un futur émetteur.
+ */
+export function secretKey(secret: string): Buffer {
+  const hex = /^[0-9a-fA-F]+$/.test(secret) && secret.length % 2 === 0;
+  return hex ? Buffer.from(secret, "hex") : Buffer.from(secret, "utf8");
+}
+
 export function computeSignature(secret: string, payload: string): string {
-  return createHmac("sha256", secret).update(payload).digest("hex");
+  return createHmac("sha256", secretKey(secret)).update(payload).digest("hex");
 }
 
 function equals(a: string, b: string): boolean {
