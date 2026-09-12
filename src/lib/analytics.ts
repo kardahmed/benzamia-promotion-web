@@ -41,6 +41,8 @@ export type AnalyticsEvent =
   | "contact_channel_click"
   | "virtual_tour_engaged"
   | "virtual_tour_room"
+  // — consentement —
+  | "consent_choice"
   // — entonnoir formulaire —
   | "form_start"
   | "form_submit"
