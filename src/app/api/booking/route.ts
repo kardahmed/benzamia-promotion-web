@@ -110,9 +110,11 @@ export async function POST(request: Request) {
       ? (body.analytics as Record<string, unknown>)
       : {};
   const { ip, userAgent } = requestClientInfo(request);
-  const fireLead = () => {
+  // Attendu (et non « fire and forget ») : sur Hostinger le processus peut être
+  // figé dès la réponse envoyée, ce qui coupait la requête vers Meta/GA4 en vol.
+  const fireLead = async () => {
     if (typeof a.eventId !== "string") return;
-    void sendServerLead({
+    await sendServerLead({
       leadType: "visit_request",
       eventId: a.eventId,
       clientId: typeof a.clientId === "string" ? a.clientId : undefined,
@@ -143,7 +145,7 @@ export async function POST(request: Request) {
       stored.id,
       team.ok ? "sent" : team.skipped ? "skipped" : "failed",
     );
-    fireLead();
+    await fireLead();
     return NextResponse.json({
       status: "accepted",
       leadId: stored.id,
@@ -155,7 +157,7 @@ export async function POST(request: Request) {
   if (stored.skipped) {
     const { team } = await notifyVisitRequest(visit);
     if (team.ok || team.skipped) {
-      fireLead();
+      await fireLead();
       return NextResponse.json({
         status: "accepted",
         leadId: externalRef,
@@ -175,7 +177,7 @@ export async function POST(request: Request) {
   const fallback = await sendVisitFallback(visit);
   if (fallback.ok) {
     void notifyVisitRequest(visit);
-    fireLead();
+    await fireLead();
     return NextResponse.json({
       status: "accepted",
       leadId: externalRef,
