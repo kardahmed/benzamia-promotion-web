@@ -4,10 +4,13 @@ import test from "node:test";
 
 const read = (rel) => readFile(new URL(`../../${rel}`, import.meta.url), "utf8");
 
+// Secret distribué en hexadécimal, comme le fait IMMO PRO-X.
+const SECRET_HEX = "a3f1c0de9b8477561e2d0a4c5b6f7182";
+
 const ENV = {
   IMMOPROX_INTEGRATION_ID: "int_benzamia",
   IMMOPROX_WEBHOOK_KEY_ID: "key_1",
-  IMMOPROX_WEBHOOK_SECRET: "secret-de-test",
+  IMMOPROX_WEBHOOK_SECRET: SECRET_HEX,
 };
 
 async function load() {
@@ -28,7 +31,7 @@ const headersFor = (mod, body, over = {}) => {
     ...base,
     signature:
       over.signature ??
-      mod.computeSignature(ENV.IMMOPROX_WEBHOOK_SECRET, mod.signaturePayload(base, body)),
+      mod.computeSignature(SECRET_HEX, mod.signaturePayload(base, body)),
   };
 };
 
@@ -51,6 +54,35 @@ test("webhook CRM : l'en-tête préfixé v1= est accepté", async () => {
   // Un préfixe d'une autre version ne doit pas passer pour du hex valide.
   const autre = mod.verifyWebhook({ ...base, signature: `v2=${base.signature}` }, body);
   assert.equal(autre.ok, false);
+});
+
+test("le secret hexadécimal est décodé en octets avant signature", async () => {
+  const mod = await load();
+  const { createHmac } = await import("node:crypto");
+  const payload = "charge-utile";
+  // Référence : ce que calcule l'émetteur, à partir des OCTETS du secret.
+  const attendu = createHmac("sha256", Buffer.from(SECRET_HEX, "hex"))
+    .update(payload)
+    .digest("hex");
+  assert.equal(mod.computeSignature(SECRET_HEX, payload), attendu);
+  // Signer la chaîne au lieu des octets donnerait une signature différente :
+  // c'est le bug qui aurait valu un 401 sur chaque événement.
+  const faux = createHmac("sha256", SECRET_HEX).update(payload).digest("hex");
+  assert.notEqual(attendu, faux);
+  // Un secret non hexadécimal reste utilisé tel quel.
+  assert.equal(
+    mod.computeSignature("pas-du-hex", payload),
+    createHmac("sha256", Buffer.from("pas-du-hex", "utf8")).update(payload).digest("hex"),
+  );
+});
+
+test("la route reconnaît request_id et contact_ref", async () => {
+  const src = await read("src/app/api/crm/events/route.ts");
+  for (const champ of ["external_booking_id", "external_ref", "request_id", "contact_ref"]) {
+    assert.match(src, new RegExp(`data\\.${champ}`), `référence ${champ} acceptée`);
+  }
+  // Chaque référence connue est essayée, pas seulement la première.
+  assert.match(src, /for \(const ref of refs\)/);
 });
 
 test("webhook CRM : corps modifié, signature refusée", async () => {

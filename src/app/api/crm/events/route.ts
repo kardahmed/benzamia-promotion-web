@@ -87,17 +87,33 @@ export async function POST(request: Request) {
 
   try {
     const data = (body.data ?? body) as Record<string, unknown>;
-    const externalRef = String(
-      data.external_booking_id ?? data.external_ref ?? body.external_booking_id ?? "",
-    );
+    // IMMO PRO-X référence la demande tantôt par `request_id`, tantôt par
+    // `contact_ref` selon l'origine de l'événement. On essaie chaque référence
+    // connue plutôt que d'en imposer une seule : un événement dont on ne
+    // reconnaît pas la clé serait silencieusement ignoré.
+    const refs = [
+      data.external_booking_id,
+      data.external_ref,
+      data.request_id,
+      data.contact_ref,
+      body.external_booking_id,
+      body.request_id,
+    ]
+      .filter((v): v is string => typeof v === "string" && v.trim() !== "")
+      .map((v) => v.trim());
+    const externalRef = refs[0] ?? "";
     const status = String(data.status ?? "");
 
-    if (eventType !== "booking.status_changed" || !externalRef) {
+    if (eventType !== "booking.status_changed" || refs.length === 0) {
       await finishCrmEvent(verified.integrationId, verified.eventId, "ignore", eventType);
       return NextResponse.json({ ok: true, ignored: true });
     }
 
-    const demande = await findVisitRequestByExternalRef(externalRef);
+    let demande = null;
+    for (const ref of refs) {
+      demande = await findVisitRequestByExternalRef(ref);
+      if (demande) break;
+    }
     if (!demande) {
       // Événement valide mais demande inconnue (ancienne, ou autre site).
       await finishCrmEvent(
