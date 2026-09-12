@@ -9,6 +9,7 @@ import {
   type ConsentState,
 } from "@/lib/consent";
 import { routes } from "@/content/site";
+import { track } from "@/lib/analytics";
 import { useConsent } from "./use-consent";
 
 export function ConsentBanner() {
@@ -34,6 +35,19 @@ export function ConsentBanner() {
 
   const decide = (state: ConsentState) => {
     save(state);
+    // Mesure du choix lui-même : sans ce chiffre, impossible de savoir combien
+    // de visiteurs on perd, ni si un changement de texte améliore les choses.
+    // L'événement ne contient aucune donnée personnelle et part avant que le
+    // refus ne coupe la mesure (Consent Mode : ping anonyme si refusé).
+    track("consent_choice", {
+      consent_analytics: state.analytics ? "granted" : "denied",
+      consent_marketing: state.marketing ? "granted" : "denied",
+      consent_action: state.analytics && state.marketing
+        ? "accept_all"
+        : !state.analytics && !state.marketing
+          ? "deny_all"
+          : "custom",
+    });
     setForceOpen(false);
     setDismissed(true);
     setDetails(false);
@@ -48,12 +62,13 @@ export function ConsentBanner() {
     >
       <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
         <p id={titleId} className="text-sm font-medium">
-          Cookies et mesure d’audience
+          Vous montrer les résidences qui vous correspondent
         </p>
         <p className="mt-1.5 text-sm text-white/70">
-          Nous utilisons des cookies pour mesurer l’audience du site et, avec
-          votre accord, améliorer nos campagnes. Le nécessaire au fonctionnement
-          reste toujours actif.{" "}
+          Avec votre accord, nous mesurons quelles résidences vous intéressent
+          pour vous proposer les typologies et les informations les plus utiles,
+          et éviter de vous montrer des annonces hors sujet. Le nécessaire au
+          fonctionnement du site reste toujours actif.{" "}
           <Link href={routes.cookies} className="underline hover:text-white">
             Politique de cookies
           </Link>
