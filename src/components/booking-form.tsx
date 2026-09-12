@@ -3,7 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
-import { BOOKING_SLOTS } from "@/lib/crm/payload";
+import { BOOKING_SLOTS, isClosedDay } from "@/lib/crm/payload";
 import { track } from "@/lib/analytics";
 import { LEAD_CURRENCY, LEAD_VALUE, projectItem } from "@/lib/tracking/config";
 import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
@@ -36,6 +36,9 @@ const newId = () =>
 export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
+  // Le bureau est fermé le vendredi : mieux vaut le dire à la saisie que de
+  // laisser partir une demande qui finira en replanification.
+  const [dateError, setDateError] = useState("");
   // Stable pour toute la vie du formulaire : un renvoi (retry, double-clic)
   // porte la même clé et ne crée pas de doublon.
   const idempotencyKey = useRef(newId());
@@ -51,6 +54,10 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
+    if (isClosedDay(String(data.get("preferredDate") ?? ""))) {
+      setDateError("Le bureau de vente est fermé le vendredi. Choisissez un autre jour.");
+      return;
+    }
     setStatus("sending");
     setMessage("");
     funnel.submit();
@@ -201,8 +208,21 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             type="date"
             required
             min={minBookingDate}
+            aria-describedby={dateError ? "preferredDate-error" : undefined}
+            onChange={(e) =>
+              setDateError(
+                isClosedDay(e.target.value)
+                  ? "Le bureau de vente est fermé le vendredi. Choisissez un autre jour."
+                  : "",
+              )
+            }
             className={field}
           />
+          {dateError && (
+            <p id="preferredDate-error" className="text-sm text-brand">
+              {dateError}
+            </p>
+          )}
         </div>
         <div className="grid gap-1.5">
           <label className={labelCls} htmlFor="preferredTime">

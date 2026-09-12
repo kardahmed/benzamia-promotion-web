@@ -6,6 +6,7 @@ import { saveVisitRequest, markEmailStatus } from "@/lib/supabase/store";
 import { notifyVisitRequest, sendVisitFallback } from "@/lib/notifications";
 import { sendServerLead, requestClientInfo } from "@/lib/tracking/server";
 import { submitBookingToCrm } from "@/lib/crm/bookings";
+import { isClosedDay } from "@/lib/crm/payload";
 import { updateVisitRequestFromCrm } from "@/lib/supabase/store";
 import type { BookingResult } from "@/contracts/booking";
 
@@ -61,6 +62,9 @@ export async function POST(request: Request) {
   if (fullName.length < 3) errors.push("nom et prénom (3 caractères minimum)");
   if (!/^[0-9+\s().-]{6,}$/.test(phone)) errors.push("numéro de téléphone invalide");
   if (!preferredTime) errors.push("créneau");
+  // Jour de fermeture du bureau de vente : le CRM l'accepte puis le renvoie en
+  // replanification, autant le refuser tout de suite et l'expliquer.
+  if (isClosedDay(preferredDate)) errors.push("jour ouvré (le bureau est fermé le vendredi)");
   if (!marketingConsent) errors.push("case de consentement à cocher");
 
   // Le créneau doit être demandé au moins 24 h à l'avance (premier créneau 9h).

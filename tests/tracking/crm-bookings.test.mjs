@@ -123,3 +123,22 @@ test("notes et typologie sont tronquées aux limites du contrat", () => {
   assert.equal(p.notes.length, 2000);
   assert.equal(p.desired_unit_types[0].length, 80);
 });
+
+test("le vendredi est refusé au formulaire et au serveur", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const form = await readFile(
+    new URL("../../src/components/booking-form.tsx", import.meta.url),
+    "utf8",
+  );
+  // Refus à la saisie (message immédiat) ET au moment de l'envoi : un
+  // remplissage automatique contourne le premier, pas le second.
+  assert.match(form, /isClosedDay\(e\.target\.value\)/);
+  assert.match(form, /isClosedDay\(String\(data\.get\("preferredDate"\)/);
+
+  const route = await readFile(
+    new URL("../../src/app/api/booking/route.ts", import.meta.url),
+    "utf8",
+  );
+  // Dernier rempart : une requête forgée ne passe pas non plus.
+  assert.match(route, /if \(isClosedDay\(preferredDate\)\) errors\.push/);
+});
