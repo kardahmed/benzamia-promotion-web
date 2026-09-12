@@ -40,6 +40,19 @@ test("webhook CRM : une signature valide passe", async () => {
   assert.equal(res.eventId, "evt-1");
 });
 
+test("webhook CRM : l'en-tête préfixé v1= est accepté", async () => {
+  const mod = await load();
+  const body = JSON.stringify({ type: "booking.status_changed" });
+  const base = headersFor(mod, body);
+  // Format réel d'IMMO PRO-X : « v1=<hex> », et pas le hex seul.
+  const prefixe = mod.verifyWebhook({ ...base, signature: `v1=${base.signature}` }, body);
+  assert.equal(prefixe.ok, true, "préfixe v1= accepté");
+  assert.equal(mod.verifyWebhook(base, body).ok, true, "hex nu toujours accepté");
+  // Un préfixe d'une autre version ne doit pas passer pour du hex valide.
+  const autre = mod.verifyWebhook({ ...base, signature: `v2=${base.signature}` }, body);
+  assert.equal(autre.ok, false);
+});
+
 test("webhook CRM : corps modifié, signature refusée", async () => {
   const mod = await load();
   const body = JSON.stringify({ type: "booking.status_changed", status: "completed" });
