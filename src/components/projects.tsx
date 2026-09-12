@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { homeContent } from "@/content/home";
 import { getProject } from "@/content/projects";
 import { track as sendEvent } from "@/lib/analytics";
+import { metaTrack } from "@/lib/tracking/meta";
 import { projectItem } from "@/lib/tracking/config";
 import { ActionButtons, ArrowLink } from "./cta";
 import { ChevronLeft, ChevronRight } from "./icons";
@@ -89,6 +90,7 @@ export function Projects() {
             onClick={() => {
               setActive(f);
               sendEvent("filter_projects", { filter: f, location: "accueil" });
+              metaTrack("Search", { search_string: f });
             }}
             className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
               active === f
