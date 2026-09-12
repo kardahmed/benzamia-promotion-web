@@ -201,13 +201,15 @@ export async function findVisitRequestByExternalRef(
 /** Reporte le statut CRM sur la demande d'origine. */
 export async function updateVisitRequestFromCrm(
   id: string,
-  fields: { status?: string; crmVisitId?: string },
+  fields: { status?: string; crmVisitId?: string; crmOpId?: string },
 ): Promise<void> {
   const sb = client();
   if (!sb) return;
   const patch: Record<string, unknown> = {};
   if (fields.status) patch.status = fields.status;
   if (fields.crmVisitId) patch.crm_visit_id = fields.crmVisitId;
+  // `request_id` du CRM : la référence qui reliera ses événements à la demande.
+  if (fields.crmOpId) patch.crm_op_id = fields.crmOpId;
   if (Object.keys(patch).length === 0) return;
   await sb.from("visit_requests").update(patch).eq("id", id);
 }
