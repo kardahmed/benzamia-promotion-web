@@ -25,7 +25,7 @@ const META_PIXEL_ID =
   process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_META_PIXEL_ID || "";
 const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN || "";
 const META_TEST_EVENT_CODE = process.env.META_TEST_EVENT_CODE || "";
-const META_API_VERSION = "v21.0";
+export const META_API_VERSION = "v21.0";
 
 const NET_TIMEOUT_MS = 2500;
 
@@ -56,13 +56,13 @@ function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
-function hashEmail(email?: string): string | undefined {
+export function hashEmail(email?: string): string | undefined {
   const v = email?.trim().toLowerCase();
   return v ? sha256(v) : undefined;
 }
 
 /** Téléphone : chiffres uniquement, indicatif pays inclus (défaut Algérie 213). */
-function hashPhone(phone?: string): string | undefined {
+export function hashPhone(phone?: string): string | undefined {
   if (!phone) return undefined;
   let digits = phone.replace(/[^\d]/g, "");
   if (!digits) return undefined;
@@ -71,7 +71,7 @@ function hashPhone(phone?: string): string | undefined {
   return sha256(digits);
 }
 
-function hashName(part?: string): string | undefined {
+export function hashName(part?: string): string | undefined {
   const v = part?.trim().toLowerCase().replace(/\s+/g, " ");
   return v ? sha256(v) : undefined;
 }
@@ -83,7 +83,7 @@ function hashName(part?: string): string | undefined {
  */
 export let lastLeadReport: Record<string, unknown> | null = null;
 
-async function postJson(url: string, body: unknown): Promise<void> {
+export async function postJson(url: string, body: unknown): Promise<void> {
   const response = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
