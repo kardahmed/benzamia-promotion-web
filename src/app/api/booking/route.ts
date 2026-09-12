@@ -5,6 +5,8 @@ import { verifyRecaptcha } from "@/lib/recaptcha";
 import { saveVisitRequest, markEmailStatus } from "@/lib/supabase/store";
 import { notifyVisitRequest, sendVisitFallback } from "@/lib/notifications";
 import { sendServerLead, requestClientInfo } from "@/lib/tracking/server";
+import { submitBookingToCrm } from "@/lib/crm/bookings";
+import { updateVisitRequestFromCrm } from "@/lib/supabase/store";
 import type { BookingResult } from "@/contracts/booking";
 
 export const dynamic = "force-dynamic";
@@ -139,6 +141,34 @@ export async function POST(request: Request) {
   });
 
   if (stored.ok) {
+    // Transmission au CRM. Un échec n'invalide pas la demande : elle est déjà
+    // stockée et l'équipe est prévenue par e-mail. Le conseiller la saisira à
+    // la main, et `status` garde la trace de ce qu'il s'est passé.
+    const crm = await submitBookingToCrm({
+      externalRef,
+      projectSlug,
+      fullName,
+      phone,
+      email: toStr(body.email),
+      preferredDate,
+      preferredTime,
+      typology: toStr(body.typology),
+      preferredChannel: toStr(body.preferredChannel),
+      note: toStr(body.note),
+      marketingConsent,
+      source,
+      idempotencyKey: idempotencyKey ?? externalRef,
+    });
+    await updateVisitRequestFromCrm(stored.id, {
+      status:
+        crm.status === "accepted"
+          ? "transmise"
+          : crm.status === "skipped"
+            ? undefined
+            : "en_file",
+      crmOpId: crm.status === "accepted" ? crm.requestId : undefined,
+    });
+
     const { team } = await notifyVisitRequest(visit);
     void markEmailStatus(
       "visit_requests",
