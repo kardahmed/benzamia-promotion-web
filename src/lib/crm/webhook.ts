@@ -54,6 +54,17 @@ export function signaturePayload(
   return `v1\n${h.integrationId}\n${h.eventId}\n${h.keyId}\n${h.timestamp}\n${rawBody}`;
 }
 
+/**
+ * L'en-tête envoyé par IMMO PRO-X est préfixé par la version du schéma :
+ * `v1=<hex minuscule>`. On accepte aussi le hex nu, pour ne pas dépendre d'un
+ * détail de format côté émetteur.
+ */
+export function normalizeSignature(header: string): string {
+  const value = header.trim();
+  const prefixed = /^v1=/i.exec(value);
+  return (prefixed ? value.slice(3) : value).toLowerCase();
+}
+
 export function computeSignature(secret: string, payload: string): string {
   return createHmac("sha256", secret).update(payload).digest("hex");
 }
@@ -104,7 +115,7 @@ export function verifyWebhook(
     secret,
     signaturePayload({ integrationId, eventId, keyId, timestamp }, rawBody),
   );
-  if (!equals(expected, signature.trim().toLowerCase())) {
+  if (!equals(expected, normalizeSignature(signature))) {
     return { ok: false, status: 401, reason: "signature invalide" };
   }
 
