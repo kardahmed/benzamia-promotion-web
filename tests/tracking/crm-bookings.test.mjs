@@ -96,7 +96,12 @@ test("sans configuration CRM, aucun appel réseau n'est tenté", async () => {
   // par l'essai contre une API simulée, voir la PR).
   const { readFile } = await import("node:fs/promises");
   const src = await readFile(new URL("../../src/lib/crm/bookings.ts", import.meta.url), "utf8");
-  assert.match(src, /if \(!BASE_URL \|\| !TOKEN\) return \{ status: "skipped" \}/);
+  assert.match(src, /if \(!BASE_URL \|\| !TOKEN\) \{/);
+  assert.match(src, /return \{ status: "skipped" \}/);
+  // Le motif de l'inaction est journalisé : « appel non tenté » doit se
+  // distinguer de « appel refusé » sans fouiller les logs du serveur.
+  assert.match(src, /IMMOPROX_API_TOKEN absent/);
+  assert.match(src, /export function crmStatus/);
   assert.match(src, /x-idempotency-key/);
   assert.match(src, /AbortSignal\.timeout\(TIMEOUT_MS\)/);
   // 4xx : rejouer ne sert à rien ; 5xx : indisponible, rejeu légitime.

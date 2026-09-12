@@ -14,6 +14,25 @@ const TOKEN = process.env.IMMOPROX_API_TOKEN || "";
 /** Le CRM revalide de son côté ; on ne bloque jamais le visiteur longtemps. */
 const TIMEOUT_MS = 5000;
 
+/**
+ * Dernier envoi tenté, exposé par /api/health. Sans cette trace, distinguer
+ * « appel jamais tenté » de « appel refusé » obligeait à fouiller les logs du
+ * serveur — et le statut en base ne dit pas POURQUOI le CRM a refusé.
+ * Aucune donnée personnelle : seulement l'issue et le code.
+ */
+export let lastBookingReport: Record<string, unknown> | null = null;
+
+/** Présence des réglages (jamais les valeurs) — pour /api/health. */
+export function crmStatus() {
+  return {
+    baseUrl: Boolean(BASE_URL),
+    token: Boolean(TOKEN),
+    webhookSecret: Boolean(process.env.IMMOPROX_WEBHOOK_SECRET),
+    integrationId: Boolean(process.env.IMMOPROX_INTEGRATION_ID),
+    lastBooking: lastBookingReport,
+  };
+}
+
 export type CrmBookingResult =
   | { status: "accepted"; requestId: string; replayed: boolean }
   | { status: "rejected"; code: string }
@@ -27,7 +46,14 @@ export type CrmBookingResult =
 export async function submitBookingToCrm(
   input: BookingSubmission,
 ): Promise<CrmBookingResult> {
-  if (!BASE_URL || !TOKEN) return { status: "skipped" };
+  if (!BASE_URL || !TOKEN) {
+    lastBookingReport = {
+      at: new Date().toISOString(),
+      result: "skipped",
+      detail: !BASE_URL ? "IMMOPROX_API_BASE_URL absent" : "IMMOPROX_API_TOKEN absent",
+    };
+    return { status: "skipped" };
+  }
 
   const payload = buildBookingPayload(input);
   if (!payload) {
@@ -50,6 +76,14 @@ export async function submitBookingToCrm(
 
     const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
 
+    lastBookingReport = {
+      at: new Date().toISOString(),
+      httpStatus: response.status,
+      // Code d'erreur du contrat (idempotency_mismatch, minimum_booking_notice_24h…)
+      error: typeof body.error === "string" ? body.error : undefined,
+      replayed: body.replayed === true,
+    };
+
     if (response.status === 202) {
       return {
         status: "accepted",
@@ -63,6 +97,11 @@ export async function submitBookingToCrm(
     }
     return { status: "unavailable", detail: `http_${response.status}` };
   } catch (error) {
+    lastBookingReport = {
+      at: new Date().toISOString(),
+      result: "unavailable",
+      detail: String(error).slice(0, 200),
+    };
     return { status: "unavailable", detail: String(error).slice(0, 200) };
   }
 }
