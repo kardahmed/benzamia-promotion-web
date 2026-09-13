@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useCallback, useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
 import { BOOKING_SLOTS, isClosedDay } from "@/lib/crm/payload";
@@ -39,11 +39,40 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   // Le bureau est fermé le vendredi : mieux vaut le dire à la saisie que de
   // laisser partir une demande qui finira en replanification.
   const [dateError, setDateError] = useState("");
+  // Créneaux réellement libres, lus dans le CRM via /api/booking/availability.
+  // `null` = pas encore demandé ; tableau vide = journée complète ou fermée.
+  const [slots, setSlots] = useState<{ startsAt: string; label: string }[] | null>(null);
+  const [slotsState, setSlotsState] = useState<"idle" | "loading" | "fallback" | "empty">("idle");
+  const [project, setProject] = useState(defaultProject ?? "");
+  const [date, setDate] = useState("");
   // Stable pour toute la vie du formulaire : un renvoi (retry, double-clic)
   // porte la même clé et ne crée pas de doublon.
   const idempotencyKey = useRef(newId());
   const getRecaptchaToken = useRecaptcha();
   const funnel = useFormFunnel("booking", { project: defaultProject });
+
+  const loadSlots = useCallback(async (p: string, d: string) => {
+    if (!p || !d) return;
+    setSlotsState("loading");
+    setSlots(null);
+    try {
+      const res = await fetch(
+        `/api/booking/availability?project=${encodeURIComponent(p)}&date=${encodeURIComponent(d)}`,
+      );
+      const data = await res.json();
+      // Intégration absente ou CRM injoignable : on garde les demi-journées
+      // plutôt que de bloquer le visiteur, la demande restera à confirmer.
+      if (!res.ok || data.configured === false) {
+        setSlotsState("fallback");
+        return;
+      }
+      const found = Array.isArray(data.slots) ? data.slots : [];
+      setSlots(found);
+      setSlotsState(found.length === 0 ? "empty" : "idle");
+    } catch {
+      setSlotsState("fallback");
+    }
+  }, []);
 
   function onFirstInteraction() {
     funnel.start();
@@ -177,6 +206,10 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
           name="projectSlug"
           required
           defaultValue={defaultProject ?? ""}
+          onChange={(e) => {
+            setProject(e.target.value);
+            if (date) void loadSlots(e.target.value, date);
+          }}
           className={field}
         >
           <option value="" disabled>
@@ -209,13 +242,21 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             required
             min={minBookingDate}
             aria-describedby={dateError ? "preferredDate-error" : undefined}
-            onChange={(e) =>
+            onChange={(e) => {
+              const closed = isClosedDay(e.target.value);
               setDateError(
-                isClosedDay(e.target.value)
+                closed
                   ? "Le bureau de vente est fermé le vendredi. Choisissez un autre jour."
                   : "",
-              )
-            }
+              );
+              setDate(closed ? "" : e.target.value);
+              if (closed) {
+                setSlots(null);
+                setSlotsState("idle");
+              } else if (project) {
+                void loadSlots(project, e.target.value);
+              }
+            }}
             className={field}
           />
           {dateError && (
@@ -233,18 +274,36 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             name="preferredTime"
             required
             defaultValue=""
+            disabled={slotsState === "loading" || (slots !== null && slots.length === 0)}
             onChange={(e) =>
               e.target.value && track("select_slot", { slot: e.target.value })
             }
             className={field}
           >
             <option value="" disabled>
-              Choisir
+              {slotsState === "loading"
+                ? "Recherche des créneaux…"
+                : !project || !date
+                  ? "Choisissez d’abord la résidence et la date"
+                  : "Choisir"}
             </option>
-            {BOOKING_SLOTS.map((slot) => (
-              <option key={slot.label}>{slot.label}</option>
-            ))}
+            {/* Heures réelles du planning quand le CRM répond ; sinon les deux
+                demi-journées, pour ne jamais bloquer une demande. */}
+            {slots
+              ? slots.map((slot) => (
+                  <option key={slot.startsAt} value={slot.startsAt}>
+                    {slot.label}
+                  </option>
+                ))
+              : BOOKING_SLOTS.map((slot) => (
+                  <option key={slot.label}>{slot.label}</option>
+                ))}
           </select>
+          {slotsState === "empty" && (
+            <p className="text-sm text-brand">
+              Aucun créneau libre ce jour-là. Choisissez une autre date.
+            </p>
+          )}
         </div>
       </div>
 

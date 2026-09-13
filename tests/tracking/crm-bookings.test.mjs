@@ -142,3 +142,32 @@ test("le vendredi est refusé au formulaire et au serveur", async () => {
   // Dernier rempart : une requête forgée ne passe pas non plus.
   assert.match(route, /if \(isClosedDay\(preferredDate\)\) errors\.push/);
 });
+
+test("bornes UTC d'une journée d'Alger", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const src = await readFile(new URL("../../src/lib/crm/availability.ts", import.meta.url), "utf8");
+  // La journée locale déborde sur la veille en UTC (Alger = UTC+1).
+  assert.match(src, /Date\.UTC\(y, m - 1, d, -1, 0, 0, 0\)/);
+  // La durée vient de la réponse, jamais imposée dans la requête.
+  assert.ok(!/duration_minutes/.test(src.split("searchParams")[1] ?? ""), "aucune durée imposée");
+  assert.match(src, /Number\(body\.duration_minutes\)/);
+  // Le jeton ne sort jamais du serveur.
+  assert.match(src, /authorization: `Bearer \$\{TOKEN\}`/);
+});
+
+test("le créneau est revérifié à l'envoi et la demande part même sans base", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const route = await readFile(
+    new URL("../../src/app/api/booking/route.ts", import.meta.url),
+    "utf8",
+  );
+  // Un créneau absent du planning au moment de l'envoi est refusé (409).
+  assert.match(route, /Ce créneau vient d'être pris/);
+  assert.match(route, /status: 409/);
+  // L'appel au CRM ne dépend plus du stockage : une base indisponible ne doit
+  // pas empêcher la demande d'arriver aux conseillers.
+  assert.ok(
+    route.indexOf("submitBookingToCrm") < route.indexOf("const stored = await saveVisitRequest"),
+    "la transmission précède le stockage",
+  );
+});

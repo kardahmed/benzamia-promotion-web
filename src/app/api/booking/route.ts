@@ -7,6 +7,7 @@ import { notifyVisitRequest, sendVisitFallback } from "@/lib/notifications";
 import { sendServerLead, requestClientInfo } from "@/lib/tracking/server";
 import { submitBookingToCrm } from "@/lib/crm/bookings";
 import { isClosedDay } from "@/lib/crm/payload";
+import { fetchAvailability, toLocalLabel } from "@/lib/crm/availability";
 import { updateVisitRequestFromCrm } from "@/lib/supabase/store";
 import type { BookingResult } from "@/contracts/booking";
 
@@ -54,7 +55,13 @@ export async function POST(request: Request) {
   const fullName = String(body.fullName ?? "").trim();
   const phone = String(body.phone ?? "").trim();
   const preferredDate = String(body.preferredDate ?? "");
-  const preferredTime = String(body.preferredTime ?? "");
+  // Le formulaire envoie soit un créneau exact du planning (date ISO), soit
+  // une demi-journée quand l'intégration n'est pas joignable.
+  const preferredTimeRaw = String(body.preferredTime ?? "");
+  const isoSlot = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(preferredTimeRaw)
+    ? preferredTimeRaw
+    : undefined;
+  const preferredTime = isoSlot ? toLocalLabel(isoSlot) : preferredTimeRaw;
   const marketingConsent = body.marketingConsent === true;
 
   const errors: string[] = [];
@@ -84,6 +91,30 @@ export async function POST(request: Request) {
       } satisfies BookingResult,
       { status: 422 },
     );
+  }
+
+  // Revérification du créneau : entre l'affichage et l'envoi, quelqu'un a pu
+  // le prendre. Le CRM revalidera de son côté, mais autant le dire tout de
+  // suite plutôt que de promettre un rendez-vous impossible.
+  let crmDuration: number | undefined;
+  if (isoSlot) {
+    const dispo = await fetchAvailability({
+      projectRef: projectSlug,
+      date: preferredDate,
+    }).catch(() => ({ status: "error" as const, detail: "indisponible" }));
+    if (dispo.status === "ok") {
+      crmDuration = dispo.durationMinutes;
+      if (!dispo.slots.some((s) => s.startsAt === isoSlot)) {
+        return NextResponse.json(
+          {
+            status: "rejected",
+            reason:
+              "Ce créneau vient d'être pris. Choisissez-en un autre dans la liste.",
+          } satisfies BookingResult,
+          { status: 409 },
+        );
+      }
+    }
   }
 
   const idempotencyKey = toStr(body.idempotencyKey);
@@ -137,6 +168,27 @@ export async function POST(request: Request) {
     });
   };
 
+  // Transmission au CRM, indépendante du stockage : c'est lui le registre des
+  // rendez-vous. Si la base tombait, les demandes continueraient d'arriver aux
+  // conseillers au lieu de s'arrêter en silence.
+  const crm = await submitBookingToCrm({
+    externalRef,
+    projectSlug,
+    fullName,
+    phone,
+    email: toStr(body.email),
+    preferredDate,
+    preferredTime,
+    typology: toStr(body.typology),
+    preferredChannel: toStr(body.preferredChannel),
+    note: toStr(body.note),
+    marketingConsent,
+    source,
+    idempotencyKey: idempotencyKey ?? externalRef,
+    startsAtIso: isoSlot,
+    durationMinutes: crmDuration,
+  });
+
   const stored = await saveVisitRequest({
     idempotencyKey,
     ...visit,
@@ -145,24 +197,6 @@ export async function POST(request: Request) {
   });
 
   if (stored.ok) {
-    // Transmission au CRM. Un échec n'invalide pas la demande : elle est déjà
-    // stockée et l'équipe est prévenue par e-mail. Le conseiller la saisira à
-    // la main, et `status` garde la trace de ce qu'il s'est passé.
-    const crm = await submitBookingToCrm({
-      externalRef,
-      projectSlug,
-      fullName,
-      phone,
-      email: toStr(body.email),
-      preferredDate,
-      preferredTime,
-      typology: toStr(body.typology),
-      preferredChannel: toStr(body.preferredChannel),
-      note: toStr(body.note),
-      marketingConsent,
-      source,
-      idempotencyKey: idempotencyKey ?? externalRef,
-    });
     await updateVisitRequestFromCrm(stored.id, {
       status:
         crm.status === "accepted"

@@ -65,6 +65,10 @@ export type BookingSubmission = {
   source: Record<string, unknown>;
   idempotencyKey: string;
   submittedAt?: Date;
+  /** Créneau exact renvoyé par le CRM (prioritaire sur `preferredTime`). */
+  startsAtIso?: string;
+  /** Durée renvoyée par le CRM (prioritaire sur la valeur miroir). */
+  durationMinutes?: number;
 };
 
 export type CrmBookingResult =
@@ -107,8 +111,10 @@ const ATTRIBUTION_KEYS = [
 export function buildBookingPayload(
   input: BookingSubmission,
 ): Record<string, unknown> | null {
-  const startsAt = slotToUtcStart(input.preferredDate, input.preferredTime);
-  if (!startsAt) return null;
+  // Créneau réel du planning quand il existe ; sinon repli sur la demi-journée,
+  // le temps que l'intégration soit branchée partout.
+  const startsAt = input.startsAtIso ?? slotToUtcStart(input.preferredDate, input.preferredTime);
+  if (!startsAt || Number.isNaN(new Date(startsAt).getTime())) return null;
 
   // Le formulaire demande « Nom et prénom » en un seul champ. Si le visiteur
   // n'écrit qu'un mot, on le met dans les deux : le CRM exige les deux champs,
@@ -138,7 +144,7 @@ export function buildBookingPayload(
     external_booking_id: input.externalRef,
     project_ref: input.projectSlug,
     starts_at: startsAt,
-    duration_minutes: DURATION_MINUTES,
+    duration_minutes: input.durationMinutes ?? DURATION_MINUTES,
     client: {
       first_name: firstName,
       last_name: lastName,
