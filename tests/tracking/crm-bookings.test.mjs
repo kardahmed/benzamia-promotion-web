@@ -9,7 +9,8 @@ const base = {
   fullName: "Ahmed Kard",
   phone: "0561739762",
   preferredDate: "2026-09-16",
-  preferredTime: "Matin (9h – 12h)",
+  preferredTime: "09:00",
+  durationMinutes: 30,
   marketingConsent: true,
   source: {},
   idempotencyKey: "11111111-2222-3333-4444-555555555555",
@@ -18,15 +19,15 @@ const base = {
 
 test("créneau converti en UTC au format exact du contrat", () => {
   // Alger = UTC+1 : 9 h locales -> 08:00 UTC, millisecondes explicites.
-  assert.equal(mod.slotToUtcStart("2026-09-16", "Matin (9h – 12h)"), "2026-09-16T08:00:00.000Z");
+  assert.equal(mod.slotToUtcStart("2026-09-16", "09:00"), "2026-09-16T08:00:00.000Z");
   assert.equal(
-    mod.slotToUtcStart("2026-09-16", "Après-midi (14h – 17h)"),
+    mod.slotToUtcStart("2026-09-16", "14:00"),
     "2026-09-16T13:00:00.000Z",
     "la pause du tenant va jusqu'à 14 h",
   );
   assert.equal(mod.slotToUtcStart("2026-09-16", "Après-midi (13h – 17h)"), null);
   assert.equal(mod.slotToUtcStart("2026-09-16", "Soirée"), null, "créneau inconnu -> null");
-  assert.equal(mod.slotToUtcStart("16/09/2026", "Matin (9h – 12h)"), null, "date invalide -> null");
+  assert.equal(mod.slotToUtcStart("16/09/2026", "09:00"), null, "date invalide -> null");
 });
 
 test("le corps ne contient que les champs autorisés", () => {
@@ -109,11 +110,6 @@ test("sans configuration CRM, aucun appel réseau n'est tenté", async () => {
   assert.match(src, /status: "unavailable"/);
 });
 
-test("le vendredi est reconnu comme jour de fermeture", () => {
-  assert.equal(mod.isClosedDay("2026-09-18"), true, "2026-09-18 est un vendredi");
-  assert.equal(mod.isClosedDay("2026-09-19"), false, "samedi ouvert");
-});
-
 test("notes et typologie sont tronquées aux limites du contrat", () => {
   const p = mod.buildBookingPayload({
     ...base,
@@ -124,21 +120,7 @@ test("notes et typologie sont tronquées aux limites du contrat", () => {
   assert.equal(p.desired_unit_types[0].length, 80);
 });
 
-test("le vendredi est refusé au formulaire et au serveur", async () => {
-  const { readFile } = await import("node:fs/promises");
-  const form = await readFile(
-    new URL("../../src/components/booking-form.tsx", import.meta.url),
-    "utf8",
-  );
-  // Refus à la saisie (message immédiat) ET au moment de l'envoi : un
-  // remplissage automatique contourne le premier, pas le second.
-  assert.match(form, /isClosedDay\(e\.target\.value\)/);
-  assert.match(form, /isClosedDay\(String\(data\.get\("preferredDate"\)/);
-
-  const route = await readFile(
-    new URL("../../src/app/api/booking/route.ts", import.meta.url),
-    "utf8",
-  );
-  // Dernier rempart : une requête forgée ne passe pas non plus.
-  assert.match(route, /if \(isClosedDay\(preferredDate\)\) errors\.push/);
+test("la durée suit la réponse CRM sans valeur par défaut", () => {
+  assert.equal(mod.buildBookingPayload({...base, durationMinutes:45}).duration_minutes,45);
+  assert.equal(mod.buildBookingPayload({...base, durationMinutes:undefined}), null);
 });

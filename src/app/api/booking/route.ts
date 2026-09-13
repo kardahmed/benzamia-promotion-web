@@ -6,7 +6,8 @@ import { saveVisitRequest, markEmailStatus } from "@/lib/supabase/store";
 import { notifyVisitRequest, sendVisitFallback } from "@/lib/notifications";
 import { sendServerLead, requestClientInfo } from "@/lib/tracking/server";
 import { submitBookingToCrm } from "@/lib/crm/bookings";
-import { isClosedDay } from "@/lib/crm/payload";
+import { slotToUtcStart } from "@/lib/crm/payload";
+import { getAvailability } from "@/lib/crm/availability";
 import { updateVisitRequestFromCrm } from "@/lib/supabase/store";
 import type { BookingResult } from "@/contracts/booking";
 
@@ -21,7 +22,7 @@ export const dynamic = "force-dynamic";
  * Flux : validation → anti-abus → stockage durable (Supabase, idempotent) →
  * emails (équipe + accusé client). Si le stockage échoue alors que Supabase
  * est configuré → repli e-mail vers BOOKING_FALLBACK_EMAIL. Le branchement
- * IMMO PRO-X (endpoint partenaire) reste à faire côté CRM.
+ * IMMO PRO-X reçoit la demande pour confirmation manuelle.
  */
 const toStr = (v: unknown) => (v == null ? undefined : String(v).trim() || undefined);
 export async function POST(request: Request) {
@@ -62,13 +63,11 @@ export async function POST(request: Request) {
   if (fullName.length < 3) errors.push("nom et prénom (3 caractères minimum)");
   if (!/^[0-9+\s().-]{6,}$/.test(phone)) errors.push("numéro de téléphone invalide");
   if (!preferredTime) errors.push("créneau");
-  // Jour de fermeture du bureau de vente : le CRM l'accepte puis le renvoie en
-  // replanification, autant le refuser tout de suite et l'expliquer.
-  if (isClosedDay(preferredDate)) errors.push("jour ouvré (le bureau est fermé le vendredi)");
   if (!marketingConsent) errors.push("case de consentement à cocher");
 
-  // Le créneau doit être demandé au moins 24 h à l'avance (premier créneau 9h).
-  const slotStart = new Date(`${preferredDate}T09:00:00`);
+  // Le créneau exact doit être demandé au moins 24 h à l'avance.
+  const startsAt = slotToUtcStart(preferredDate, preferredTime);
+  const slotStart = new Date(startsAt || NaN);
   const minLeadMs = BOOKING_MIN_LEAD_HOURS * 60 * 60 * 1000;
   if (!preferredDate || Number.isNaN(slotStart.getTime())) {
     errors.push("date");
@@ -84,6 +83,18 @@ export async function POST(request: Request) {
       } satisfies BookingResult,
       { status: 422 },
     );
+  }
+
+  // Re-read the CRM immediately before storing/sending. No fallback calendar.
+  let durationMinutes: number;
+  try {
+    const availability = await getAvailability(projectSlug, preferredDate);
+    if (!availability.slots.some(slot => slot.starts_at === startsAt)) {
+      return NextResponse.json({status: "rejected", reason: "Ce créneau n’est plus disponible. Choisissez une autre heure."} satisfies BookingResult, {status: 409});
+    }
+    durationMinutes = availability.duration_minutes;
+  } catch {
+    return NextResponse.json({status: "retry", reason: "Les disponibilités sont temporairement indisponibles. Réessayez dans un instant ou appelez-nous."} satisfies BookingResult, {status: 503});
   }
 
   const idempotencyKey = toStr(body.idempotencyKey);
@@ -162,6 +173,7 @@ export async function POST(request: Request) {
       marketingConsent,
       source,
       idempotencyKey: idempotencyKey ?? externalRef,
+      durationMinutes,
     });
     await updateVisitRequestFromCrm(stored.id, {
       status:

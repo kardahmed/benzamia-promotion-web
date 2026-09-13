@@ -1,9 +1,8 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
-import { BOOKING_SLOTS, isClosedDay } from "@/lib/crm/payload";
 import { track } from "@/lib/analytics";
 import { LEAD_CURRENCY, LEAD_VALUE, projectItem } from "@/lib/tracking/config";
 import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
@@ -14,7 +13,7 @@ import { RecaptchaNotice, useRecaptcha } from "./recaptcha";
 type Status = "idle" | "sending" | "sent" | "error";
 
 /** Première date sélectionnable : 24 h après maintenant (format YYYY-MM-DD). */
-const minBookingDate = new Date(Date.now() + BOOKING_MIN_LEAD_HOURS * 3600 * 1000)
+const minBookingDate = new Date(Date.now() + (BOOKING_MIN_LEAD_HOURS + 1) * 3600 * 1000)
   .toISOString()
   .slice(0, 10);
 
@@ -36,9 +35,35 @@ const newId = () =>
 export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
-  // Le bureau est fermé le vendredi : mieux vaut le dire à la saisie que de
-  // laisser partir une demande qui finira en replanification.
-  const [dateError, setDateError] = useState("");
+  const [projectSlug, setProjectSlug] = useState(defaultProject ?? "");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [refresh, setRefresh] = useState(0);
+  const [availability, setAvailability] = useState<{
+    key: string; slots: { starts_at: string; ends_at: string }[];
+    duration_minutes: number; error?: boolean;
+  } | null>(null);
+  const selectionKey = `${projectSlug}/${date}/${refresh}`;
+  const current = availability?.key === selectionKey ? availability : null;
+  const hour = (iso: string) => new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Africa/Algiers", hour: "2-digit", minute: "2-digit",
+  }).format(new Date(iso));
+  const validTime = !!time && !!current?.slots.some((slot) => hour(slot.starts_at) === time);
+
+  useEffect(() => {
+    if (!projectSlug || !date) return;
+    const controller = new AbortController();
+    fetch(`/api/booking/availability?${new URLSearchParams({ project: projectSlug, date })}`, {
+      signal: controller.signal, cache: "no-store",
+    }).then(async (response) => {
+      if (!response.ok) throw new Error("unavailable");
+      const result = await response.json();
+      if (!controller.signal.aborted) setAvailability({ ...result, key: selectionKey });
+    }).catch(() => {
+      if (!controller.signal.aborted) setAvailability({ key: selectionKey, slots: [], duration_minutes: 0, error: true });
+    });
+    return () => controller.abort();
+  }, [projectSlug, date, selectionKey]);
   // Stable pour toute la vie du formulaire : un renvoi (retry, double-clic)
   // porte la même clé et ne crée pas de doublon.
   const idempotencyKey = useRef(newId());
@@ -54,10 +79,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
-    if (isClosedDay(String(data.get("preferredDate") ?? ""))) {
-      setDateError("Le bureau de vente est fermé le vendredi. Choisissez un autre jour.");
-      return;
-    }
+    if (!validTime) return;
     setStatus("sending");
     setMessage("");
     funnel.submit();
@@ -126,6 +148,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
         metaTrack("Schedule", residence, `${eventId}-schedule`);
         form.reset();
       } else {
+        if (res.status === 409) { setTime(""); setRefresh((value) => value + 1); }
         setStatus("error");
         funnel.error(result.reason ?? "erreur inconnue");
         setMessage(result.reason ?? "Une erreur est survenue.");
@@ -147,7 +170,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
         </p>
         <button
           type="button"
-          onClick={() => setStatus("idle")}
+          onClick={() => { idempotencyKey.current = newId(); setDate(""); setTime(""); setStatus("idle"); }}
           className="mt-4 text-sm font-medium text-brand"
         >
           Envoyer une autre demande
@@ -176,7 +199,8 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
           id="projectSlug"
           name="projectSlug"
           required
-          defaultValue={defaultProject ?? ""}
+          value={projectSlug}
+          onChange={(e) => { setProjectSlug(e.target.value); setTime(""); }}
           className={field}
         >
           <option value="" disabled>
@@ -208,21 +232,11 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             type="date"
             required
             min={minBookingDate}
-            aria-describedby={dateError ? "preferredDate-error" : undefined}
-            onChange={(e) =>
-              setDateError(
-                isClosedDay(e.target.value)
-                  ? "Le bureau de vente est fermé le vendredi. Choisissez un autre jour."
-                  : "",
-              )
-            }
+            value={date}
+            onInput={(e) => { setDate(e.currentTarget.value); setTime(""); }}
+            onChange={(e) => { setDate(e.target.value); setTime(""); }}
             className={field}
           />
-          {dateError && (
-            <p id="preferredDate-error" className="text-sm text-brand">
-              {dateError}
-            </p>
-          )}
         </div>
         <div className="grid gap-1.5">
           <label className={labelCls} htmlFor="preferredTime">
@@ -232,19 +246,30 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             id="preferredTime"
             name="preferredTime"
             required
-            defaultValue=""
-            onChange={(e) =>
-              e.target.value && track("select_slot", { slot: e.target.value })
-            }
+            value={time}
+            disabled={!current || current.error || !current.slots.length}
+            aria-describedby="availability-status"
+            onChange={(e) => { setTime(e.target.value); track("select_slot", { slot: e.target.value }); }}
             className={field}
           >
             <option value="" disabled>
               Choisir
             </option>
-            {BOOKING_SLOTS.map((slot) => (
-              <option key={slot.label}>{slot.label}</option>
+            {current?.slots.map((slot) => (
+              <option key={slot.starts_at} value={hour(slot.starts_at)}>
+                {hour(slot.starts_at)} – {hour(slot.ends_at)}
+              </option>
             ))}
           </select>
+          <p id="availability-status" role="status" className="text-xs text-graphite">
+            {!projectSlug || !date ? "Choisissez une résidence et une date."
+              : !current ? "Recherche des disponibilités…"
+              : current.error ? "Disponibilités temporairement indisponibles. Réessayez ou appelez-nous."
+              : !current.slots.length ? "Aucun créneau disponible ce jour. Choisissez une autre date."
+              : `Heure d’Algérie · durée : ${current.duration_minutes} minutes · confirmation par un conseiller.`}
+          </p>
+          {current?.error && <button type="button" className="text-sm text-brand" onClick={() => setRefresh((value) => value + 1)}>Réessayer</button>}
+
         </div>
       </div>
 
@@ -321,7 +346,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
 
       <button
         type="submit"
-        disabled={status === "sending"}
+        disabled={status === "sending" || !validTime}
         className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-medium text-white transition-colors hover:bg-brand-bright disabled:opacity-60"
       >
         {status === "sending" ? "Envoi…" : "Envoyer ma demande de visite"}
