@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState, type FormEvent } from "react";
 import { projects } from "@/content/projects";
 import { BOOKING_MIN_LEAD_HOURS, contact } from "@/content/site";
-import { BOOKING_SLOTS, isClosedDay } from "@/lib/crm/payload";
+
 import { track } from "@/lib/analytics";
 import { LEAD_CURRENCY, LEAD_VALUE, projectItem } from "@/lib/tracking/config";
 import { collectLeadContext, newEventId } from "@/lib/tracking/ids";
@@ -36,13 +36,12 @@ const newId = () =>
 export function BookingForm({ defaultProject }: { defaultProject?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
-  // Le bureau est fermé le vendredi : mieux vaut le dire à la saisie que de
-  // laisser partir une demande qui finira en replanification.
-  const [dateError, setDateError] = useState("");
   // Créneaux réellement libres, lus dans le CRM via /api/booking/availability.
   // `null` = pas encore demandé ; tableau vide = journée complète ou fermée.
   const [slots, setSlots] = useState<{ startsAt: string; label: string }[] | null>(null);
-  const [slotsState, setSlotsState] = useState<"idle" | "loading" | "fallback" | "empty">("idle");
+  const [slotsState, setSlotsState] = useState<
+    "idle" | "loading" | "unavailable" | "empty"
+  >("idle");
   const [project, setProject] = useState(defaultProject ?? "");
   const [date, setDate] = useState("");
   // Stable pour toute la vie du formulaire : un renvoi (retry, double-clic)
@@ -60,17 +59,18 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
         `/api/booking/availability?project=${encodeURIComponent(p)}&date=${encodeURIComponent(d)}`,
       );
       const data = await res.json();
-      // Intégration absente ou CRM injoignable : on garde les demi-journées
-      // plutôt que de bloquer le visiteur, la demande restera à confirmer.
-      if (!res.ok || data.configured === false) {
-        setSlotsState("fallback");
+      // Planning injoignable : on ne propose AUCUNE heure. Afficher des
+      // demi-journées « par défaut » ferait espérer un rendez-vous que
+      // personne ne peut tenir.
+      if (!res.ok) {
+        setSlotsState("unavailable");
         return;
       }
       const found = Array.isArray(data.slots) ? data.slots : [];
       setSlots(found);
       setSlotsState(found.length === 0 ? "empty" : "idle");
     } catch {
-      setSlotsState("fallback");
+      setSlotsState("unavailable");
     }
   }, []);
 
@@ -83,10 +83,6 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
-    if (isClosedDay(String(data.get("preferredDate") ?? ""))) {
-      setDateError("Le bureau de vente est fermé le vendredi. Choisissez un autre jour.");
-      return;
-    }
     setStatus("sending");
     setMessage("");
     funnel.submit();
@@ -241,29 +237,12 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             type="date"
             required
             min={minBookingDate}
-            aria-describedby={dateError ? "preferredDate-error" : undefined}
             onChange={(e) => {
-              const closed = isClosedDay(e.target.value);
-              setDateError(
-                closed
-                  ? "Le bureau de vente est fermé le vendredi. Choisissez un autre jour."
-                  : "",
-              );
-              setDate(closed ? "" : e.target.value);
-              if (closed) {
-                setSlots(null);
-                setSlotsState("idle");
-              } else if (project) {
-                void loadSlots(project, e.target.value);
-              }
+              setDate(e.target.value);
+              if (project) void loadSlots(project, e.target.value);
             }}
             className={field}
           />
-          {dateError && (
-            <p id="preferredDate-error" className="text-sm text-brand">
-              {dateError}
-            </p>
-          )}
         </div>
         <div className="grid gap-1.5">
           <label className={labelCls} htmlFor="preferredTime">
@@ -274,7 +253,7 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
             name="preferredTime"
             required
             defaultValue=""
-            disabled={slotsState === "loading" || (slots !== null && slots.length === 0)}
+            disabled={slotsState !== "idle" || slots === null || slots.length === 0}
             onChange={(e) =>
               e.target.value && track("select_slot", { slot: e.target.value })
             }
@@ -287,21 +266,25 @@ export function BookingForm({ defaultProject }: { defaultProject?: string }) {
                   ? "Choisissez d’abord la résidence et la date"
                   : "Choisir"}
             </option>
-            {/* Heures réelles du planning quand le CRM répond ; sinon les deux
-                demi-journées, pour ne jamais bloquer une demande. */}
-            {slots
-              ? slots.map((slot) => (
-                  <option key={slot.startsAt} value={slot.startsAt}>
-                    {slot.label}
-                  </option>
-                ))
-              : BOOKING_SLOTS.map((slot) => (
-                  <option key={slot.label}>{slot.label}</option>
-                ))}
+            {/* Uniquement les heures du planning : aucune heure inventée. */}
+            {(slots ?? []).map((slot) => (
+              <option key={slot.startsAt} value={slot.startsAt}>
+                {slot.label}
+              </option>
+            ))}
           </select>
           {slotsState === "empty" && (
             <p className="text-sm text-brand">
               Aucun créneau libre ce jour-là. Choisissez une autre date.
+            </p>
+          )}
+          {slotsState === "unavailable" && (
+            <p className="text-sm text-brand">
+              Disponibilités temporairement indisponibles. Appelez-nous au{" "}
+              <a href={`tel:${contact.phones[0].replace(/\s/g, "")}`} className="underline">
+                {contact.phones[0]}
+              </a>{" "}
+              ou réessayez dans quelques minutes.
             </p>
           )}
         </div>

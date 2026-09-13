@@ -6,7 +6,6 @@ import { saveVisitRequest, markEmailStatus } from "@/lib/supabase/store";
 import { notifyVisitRequest, sendVisitFallback } from "@/lib/notifications";
 import { sendServerLead, requestClientInfo } from "@/lib/tracking/server";
 import { submitBookingToCrm } from "@/lib/crm/bookings";
-import { isClosedDay } from "@/lib/crm/payload";
 import { fetchAvailability, toLocalLabel } from "@/lib/crm/availability";
 import { updateVisitRequestFromCrm } from "@/lib/supabase/store";
 import type { BookingResult } from "@/contracts/booking";
@@ -69,9 +68,6 @@ export async function POST(request: Request) {
   if (fullName.length < 3) errors.push("nom et prénom (3 caractères minimum)");
   if (!/^[0-9+\s().-]{6,}$/.test(phone)) errors.push("numéro de téléphone invalide");
   if (!preferredTime) errors.push("créneau");
-  // Jour de fermeture du bureau de vente : le CRM l'accepte puis le renvoie en
-  // replanification, autant le refuser tout de suite et l'expliquer.
-  if (isClosedDay(preferredDate)) errors.push("jour ouvré (le bureau est fermé le vendredi)");
   if (!marketingConsent) errors.push("case de consentement à cocher");
 
   // Le créneau doit être demandé au moins 24 h à l'avance (premier créneau 9h).
@@ -168,9 +164,19 @@ export async function POST(request: Request) {
     });
   };
 
-  // Transmission au CRM, indépendante du stockage : c'est lui le registre des
-  // rendez-vous. Si la base tombait, les demandes continueraient d'arriver aux
-  // conseillers au lieu de s'arrêter en silence.
+  // Stockage AVANT la transmission : le CRM peut accepter puis nous envoyer un
+  // événement ; sans trace locale de la demande, cet événement serait
+  // impossible à rattacher — donc une visite effectuée jamais comptée.
+  const stored = await saveVisitRequest({
+    idempotencyKey,
+    ...visit,
+    marketingConsent,
+    source,
+  });
+
+  // La transmission a lieu même si le stockage a échoué : la demande doit
+  // atteindre les conseillers. La référence part alors dans l'e-mail de
+  // secours, seul moyen de la rattacher plus tard à la main.
   const crm = await submitBookingToCrm({
     externalRef,
     projectSlug,
@@ -189,12 +195,11 @@ export async function POST(request: Request) {
     durationMinutes: crmDuration,
   });
 
-  const stored = await saveVisitRequest({
-    idempotencyKey,
-    ...visit,
-    marketingConsent,
-    source,
-  });
+  if (!stored.ok && crm.status === "accepted") {
+    console.error(
+      `[booking] demande transmise au CRM mais non stockée — external_ref=${externalRef} request_id=${crm.requestId}`,
+    );
+  }
 
   if (stored.ok) {
     await updateVisitRequestFromCrm(stored.id, {

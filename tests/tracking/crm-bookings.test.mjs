@@ -124,23 +124,27 @@ test("notes et typologie sont tronquées aux limites du contrat", () => {
   assert.equal(p.desired_unit_types[0].length, 80);
 });
 
-test("le vendredi est refusé au formulaire et au serveur", async () => {
+test("le site ne juge plus des jours d'ouverture : le planning décide", async () => {
   const { readFile } = await import("node:fs/promises");
   const form = await readFile(
     new URL("../../src/components/booking-form.tsx", import.meta.url),
     "utf8",
   );
-  // Refus à la saisie (message immédiat) ET au moment de l'envoi : un
-  // remplissage automatique contourne le premier, pas le second.
-  assert.match(form, /isClosedDay\(e\.target\.value\)/);
-  assert.match(form, /isClosedDay\(String\(data\.get\("preferredDate"\)/);
-
   const route = await readFile(
     new URL("../../src/app/api/booking/route.ts", import.meta.url),
     "utf8",
   );
-  // Dernier rempart : une requête forgée ne passe pas non plus.
-  assert.match(route, /if \(isClosedDay\(preferredDate\)\) errors\.push/);
+  const dispo = await readFile(
+    new URL("../../src/app/api/booking/availability/route.ts", import.meta.url),
+    "utf8",
+  );
+  // Un vendredi codé en dur diverge dès que l'équipe change ses jours.
+  for (const [nom, src] of [["formulaire", form], ["route", route], ["dispo", dispo]]) {
+    assert.ok(!/isClosedDay/.test(src), `${nom} : aucun jour de fermeture en dur`);
+  }
+  // Et aucune heure de repli : sans planning, on ne propose rien.
+  assert.ok(!/BOOKING_SLOTS/.test(form), "aucune demi-journée de secours");
+  assert.match(form, /Disponibilités temporairement indisponibles/);
 });
 
 test("bornes UTC d'une journée d'Alger", async () => {
@@ -155,7 +159,7 @@ test("bornes UTC d'une journée d'Alger", async () => {
   assert.match(src, /authorization: `Bearer \$\{TOKEN\}`/);
 });
 
-test("le créneau est revérifié à l'envoi et la demande part même sans base", async () => {
+test("créneau revérifié à l'envoi, stockage avant transmission", async () => {
   const { readFile } = await import("node:fs/promises");
   const route = await readFile(
     new URL("../../src/app/api/booking/route.ts", import.meta.url),
@@ -164,10 +168,27 @@ test("le créneau est revérifié à l'envoi et la demande part même sans base"
   // Un créneau absent du planning au moment de l'envoi est refusé (409).
   assert.match(route, /Ce créneau vient d'être pris/);
   assert.match(route, /status: 409/);
-  // L'appel au CRM ne dépend plus du stockage : une base indisponible ne doit
-  // pas empêcher la demande d'arriver aux conseillers.
+  // Le stockage précède l'appel : un événement du CRM doit toujours pouvoir
+  // être rattaché à une demande locale.
   assert.ok(
-    route.indexOf("submitBookingToCrm") < route.indexOf("const stored = await saveVisitRequest"),
-    "la transmission précède le stockage",
+    route.indexOf("const stored = await saveVisitRequest") <
+      route.indexOf("const crm = await submitBookingToCrm"),
+    "le stockage précède la transmission",
   );
+  // Mais la transmission a lieu quand même si le stockage a échoué, avec une
+  // trace des deux références pour un rattachement manuel.
+  assert.match(route, /transmise au CRM mais non stockée/);
+});
+
+test("le délai de 24 h se juge créneau par créneau", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const src = await readFile(
+    new URL("../../src/app/api/booking/availability/route.ts", import.meta.url),
+    "utf8",
+  );
+  // Rejeter la journée entière masquerait des heures valides de l'après-midi.
+  assert.match(src, /filter\(\(s\) => new Date\(s\.startsAt\)\.getTime\(\) >= notBefore\)/);
+  assert.ok(!/tooSoon/.test(src), "plus de rejet au niveau de la journée");
+  // Planning injoignable : aucune heure proposée.
+  assert.match(src, /unavailable: true/);
 });
