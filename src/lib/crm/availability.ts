@@ -26,10 +26,10 @@ export async function getAvailability(project: string, date: string, now = Date.
     let previous = -Infinity;
     const slots = data.slots.map((s: AvailableSlot) => {
       const start = Date.parse(s.starts_at), end = Date.parse(s.ends_at);
-      if (!Number.isFinite(start) || !Number.isFinite(end) || new Date(start).toISOString() !== s.starts_at || new Date(end).toISOString() !== s.ends_at || start < from || end > range.until || start < now + 86400000 || end - start !== data.duration_minutes * 60000 || start <= previous) throw new Error();
+      if (!Number.isFinite(start) || !Number.isFinite(end) || new Date(start).toISOString() !== s.starts_at || new Date(end).toISOString() !== s.ends_at || start < from || end > range.until || end - start !== data.duration_minutes * 60000 || start <= previous) throw new Error();
       previous = start;
       return {starts_at: s.starts_at, ends_at: s.ends_at};
-    });
+    }).filter((slot: AvailableSlot) => Date.parse(slot.starts_at) >= now + 86400000);
     return {timezone: data.timezone, duration_minutes: data.duration_minutes, slot_step_minutes: data.slot_step_minutes, slots};
   } catch { throw new AvailabilityUnavailable('crm_unavailable'); }
 }

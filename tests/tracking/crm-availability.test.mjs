@@ -47,3 +47,27 @@ test('cadence absente, non entière, non positive ou supérieure à la durée re
       async () => Response.json({ ...reply([slot]), slot_step_minutes: step })), /crm_unavailable/);
   }
 });
+
+test('un créneau sous 24 h ne masque pas les heures valides du lendemain', async () => {
+  // 10:00 Alger aujourd’hui ; demain 09:00 est trop proche, 14:00 et 14:30 restent valides.
+  const current = Date.parse('2026-09-17T09:00:00.000Z');
+  const slots = [
+    { starts_at: '2026-09-18T08:00:00.000Z', ends_at: '2026-09-18T08:30:00.000Z' },
+    { starts_at: '2026-09-18T13:00:00.000Z', ends_at: '2026-09-18T13:30:00.000Z' },
+    { starts_at: '2026-09-18T13:30:00.000Z', ends_at: '2026-09-18T14:00:00.000Z' },
+  ];
+  const result = await getAvailability('residence-la-cite', '2026-09-18', current,
+    async () => Response.json(reply(slots, 30)));
+  assert.deepEqual(result.slots, slots.slice(1));
+});
+
+test('seuil 24 h inclus et journée trop proche vide sans erreur', async () => {
+  const current = Date.parse('2026-09-17T09:00:00.000Z');
+  const early = { starts_at: '2026-09-18T08:59:59.000Z', ends_at: '2026-09-18T09:29:59.000Z' };
+  const boundary = { starts_at: '2026-09-18T09:00:00.000Z', ends_at: '2026-09-18T09:30:00.000Z' };
+  for (const [slots, expected] of [[[early], []], [[early, boundary], [boundary]]]) {
+    const result = await getAvailability('residence-la-cite', '2026-09-18', current,
+      async () => Response.json(reply(slots, 30)));
+    assert.deepEqual(result.slots, expected);
+  }
+});
