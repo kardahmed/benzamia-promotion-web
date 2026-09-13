@@ -22,7 +22,7 @@ export async function getAvailability(project: string, date: string, now = Date.
     const response = await fetcher(url, {headers: {authorization: `Bearer ${token}`}, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000)});
     if (!response.ok) throw new Error();
     const data = await response.json();
-    if (data.project_ref !== project || data.timezone !== 'Africa/Algiers' || !Number.isInteger(data.duration_minutes) || data.duration_minutes < 15 || data.duration_minutes > 480 || data.slot_step_minutes !== data.duration_minutes || !Array.isArray(data.slots) || data.slots.length > 96) throw new Error();
+    if (data.project_ref !== project || data.timezone !== 'Africa/Algiers' || !Number.isInteger(data.duration_minutes) || data.duration_minutes < 15 || data.duration_minutes > 480 || !Number.isInteger(data.slot_step_minutes) || data.slot_step_minutes <= 0 || data.slot_step_minutes > data.duration_minutes || !Array.isArray(data.slots) || data.slots.length > 96) throw new Error();
     let previous = -Infinity;
     const slots = data.slots.map((s: AvailableSlot) => {
       const start = Date.parse(s.starts_at), end = Date.parse(s.ends_at);

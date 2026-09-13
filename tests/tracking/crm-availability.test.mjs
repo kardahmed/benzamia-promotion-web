@@ -28,3 +28,22 @@ test('journée algérienne et dates invalides',()=>{
   assert.equal(new Date(algerDayRange('2026-09-18').from).toISOString(),'2026-09-17T23:00:00.000Z');
   assert.throws(()=>algerDayRange('2026-02-30'));
 });
+
+test('visites de 30 minutes proposées toutes les 15 minutes', async () => {
+  const slots = [
+    { starts_at: '2026-09-18T08:00:00.000Z', ends_at: '2026-09-18T08:30:00.000Z' },
+    { starts_at: '2026-09-18T08:15:00.000Z', ends_at: '2026-09-18T08:45:00.000Z' },
+  ];
+  const result = await getAvailability('residence-la-cite', '2026-09-18', now,
+    async () => Response.json({ ...reply(slots, 30), slot_step_minutes: 15 }));
+  assert.equal(result.duration_minutes, 30);
+  assert.equal(result.slot_step_minutes, 15);
+  assert.deepEqual(result.slots, slots);
+});
+
+test('cadence absente, non entière, non positive ou supérieure à la durée refusée', async () => {
+  for (const step of [undefined, null, '15', 0, -15, 1.5, 46]) {
+    await assert.rejects(getAvailability('residence-la-cite', '2026-09-18', now,
+      async () => Response.json({ ...reply([slot]), slot_step_minutes: step })), /crm_unavailable/);
+  }
+});

@@ -13,3 +13,5 @@ Les anciens choix « Matin / Après-midi » ne sont plus acceptés. Un onglet ou
 ## Vérification locale
 
 Le 13 septembre 2026, avec API CRM simulée et aucun secret réel : le navigateur affiche 09:00–09:45 et 14:15–15:00 pour une durée CRM de 45 minutes ; une réponse vide retire les options et une réponse 503 affiche l’indisponibilité avec envoi désactivé. Les POST directs sur une journée fermée et sur une heure absente renvoient 409 ; une indisponibilité CRM renvoie 503 ; l’ancien libellé de demi-journée renvoie 422. Aucun de ces essais ne crée de demande en production.
+
+La cadence est distincte de la durée : une cadence entière strictement positive, inférieure ou égale à la durée, est acceptée. Par exemple, des visites de 30 minutes peuvent être proposées toutes les 15 minutes ; leurs heures de fin restent celles du CRM.
