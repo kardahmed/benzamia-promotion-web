@@ -1,45 +1,3 @@
-/*
- * Créneaux, conversions et corps de la demande envoyée à IMMO PRO-X.
- *
- * Ce module est volontairement SANS IMPORT : il est chargé aussi bien par le
- * formulaire (navigateur) que par la route serveur et par les tests, qui
- * s'exécutent sous Node sans résolution d'alias.
- *
- * Source de vérité des horaires : la configuration du tenant dans IMMO PRO-X.
- * Ce qui suit n'en est qu'un miroir, le temps que le site interroge
- * `GET /v1/availability` et affiche les créneaux réellement libres.
- *
- * Réglage Benzamia constaté dans le CRM le 2026-09-12 : ouverture 09:00–17:00,
- * pause 12:00–14:00, visites de 30 minutes, bureau fermé le vendredi. D'où un
- * après-midi qui commence à 14 h : un créneau à 13 h aurait été refusé au
- * traitement, après avoir fait espérer le visiteur.
- */
-
-/** Heure d'Alger : UTC+1 toute l'année, pas d'heure d'été. */
-export const ALGIERS_UTC_OFFSET_H = 1;
-
-/** Durée d'un rendez-vous, en minutes (réglage du tenant). */
-export const VISIT_DURATION_MINUTES = 30;
-
-export type BookingSlot = { label: string; startHour: number };
-
-export const BOOKING_SLOTS: BookingSlot[] = [
-  { label: "Matin (9h – 12h)", startHour: 9 },
-  { label: "Après-midi (14h – 17h)", startHour: 14 },
-];
-
-/** Jour de fermeture hebdomadaire (0 = dimanche … 5 = vendredi). */
-export const CLOSED_WEEKDAY = 5;
-
-export function isClosedDay(date: string): boolean {
-  const d = new Date(`${date}T12:00:00Z`);
-  return !Number.isNaN(d.getTime()) && d.getUTCDay() === CLOSED_WEEKDAY;
-}
-
-export function findSlot(label: string): BookingSlot | undefined {
-  return BOOKING_SLOTS.find((s) => s.label === label.trim());
-}
-
 /**
  * Version du texte d'information affiché au visiteur. À incrémenter quand la
  * politique de confidentialité change : le CRM conserve cette version comme
@@ -47,10 +5,8 @@ export function findSlot(label: string): BookingSlot | undefined {
  */
 export const PRIVACY_NOTICE_VERSION = "2026-09-v1";
 
-/** Durée envoyée au CRM (contrat : 15 à 480 minutes). */
-const DURATION_MINUTES = VISIT_DURATION_MINUTES;
-
 export type BookingSubmission = {
+  durationMinutes: number;
   externalRef: string;
   projectSlug: string;
   fullName: string;
@@ -73,16 +29,13 @@ export type CrmBookingResult =
   | { status: "unavailable"; detail: string }
   | { status: "skipped" };
 
-/** « Matin (9h – 12h) » → heure de début, en UTC, au format exact du contrat. */
-export function slotToUtcStart(preferredDate: string, preferredTime: string): string | null {
-  const slot = findSlot(preferredTime);
-  if (!slot || !/^\d{4}-\d{2}-\d{2}$/.test(preferredDate)) return null;
-  const hour = slot.startHour - ALGIERS_UTC_OFFSET_H;
-  const [y, m, d] = preferredDate.split("-").map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d, hour, 0, 0, 0));
-  if (Number.isNaN(date.getTime())) return null;
-  // Le contrat impose les millisecondes explicites.
-  return date.toISOString().replace(/\.\d{3}Z$/, ".000Z");
+/** Exact local slot label, in Algeria (UTC+1), never a half-day. */
+export function slotToUtcStart(date: string, time: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return null;
+  const day = Date.parse(`${date}T00:00:00.000Z`);
+  if (!Number.isFinite(day) || new Date(day).toISOString().slice(0, 10) !== date) return null;
+  const [hour, minute] = time.split(':').map(Number);
+  return new Date(day + (hour - 1) * 3600000 + minute * 60000).toISOString();
 }
 
 const CHANNELS: Record<string, "phone" | "whatsapp" | "email"> = {
@@ -108,7 +61,7 @@ export function buildBookingPayload(
   input: BookingSubmission,
 ): Record<string, unknown> | null {
   const startsAt = slotToUtcStart(input.preferredDate, input.preferredTime);
-  if (!startsAt) return null;
+  if (!startsAt || !Number.isInteger(input.durationMinutes) || input.durationMinutes < 15 || input.durationMinutes > 480) return null;
 
   // Le formulaire demande « Nom et prénom » en un seul champ. Si le visiteur
   // n'écrit qu'un mot, on le met dans les deux : le CRM exige les deux champs,
@@ -138,7 +91,7 @@ export function buildBookingPayload(
     external_booking_id: input.externalRef,
     project_ref: input.projectSlug,
     starts_at: startsAt,
-    duration_minutes: DURATION_MINUTES,
+    duration_minutes: input.durationMinutes,
     client: {
       first_name: firstName,
       last_name: lastName,
